@@ -1,0 +1,572 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <TITLE>Calculate Optimum Lighting Conditions for Railroad Photography</TITLE>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSosDVG8KKPE1-m51RBrvYughuyMxQ-i1QfUnH94QxWIa6N4U6MouMmBA"
+            type="text/javascript"></script>
+   </head>
+
+<body onload="initialize(12)" onunload="GUnload()"> 
+<h3>Calculate Optimum Lighting Conditions for Railroad Photography</h3>
+<form method="post" name="my_form">
+<table border=0>
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><input TYPE="button" NAME="inc_hour" VALUE="+1" onClick="adj_hrs(0)"></td>
+<td>&nbsp;</td>
+<td><input TYPE="button" NAME="inc_min" VALUE="+10" onClick="adj_min(0)"></td>
+</tr>
+<tr>
+<td>
+Date:
+ <select name="year_display" size="1" onChange="calendar_change()">
+  <option value ="2008">2008</option>
+  <option value ="2009">2009</option>
+  <option value ="2010">2010</option>
+  <option value ="2010">2011</option>
+  <option value ="2010">2012</option>
+  </select>
+  /
+  <select name="month_display" size="1" onChange="calendar_change()">
+  <option value ="1">Jan</option>
+  <option value ="2">Feb</option>
+  <option value ="3">Mar</option>
+  <option value ="4">Apr</option>
+  <option value ="5">May</option>
+  <option value ="6">Jun</option>
+  <option value ="7">Jul</option>
+  <option value ="8">Aug</option>
+  <option value ="9">Sep</option>
+  <option value ="10">Oct</option>
+  <option value ="11">Nov</option>
+  <option value ="12">Dec</option>
+  </select>
+  /
+<select name="day_display" size="1" onChange="calendar_change()">
+  <option value ="1">1</option>
+  <option value ="2">2</option>
+  <option value ="3">3</option>
+  <option value ="4">4</option>
+  <option value ="5">5</option>
+  <option value ="6">6</option>
+  <option value ="7">7</option>
+  <option value ="8">8</option>
+  <option value ="9">9</option>
+  <option value ="10">10</option>
+  <option value ="11">11</option>
+  <option value ="12">12</option>
+  <option value ="13">13</option>
+  <option value ="14">14</option>
+  <option value ="15">15</option>
+  <option value ="16">16</option>
+  <option value ="17">17</option>
+  <option value ="18">18</option>
+  <option value ="19">19</option>
+  <option value ="20">20</option>
+  <option value ="21">21</option>
+  <option value ="22">22</option>
+  <option value ="23">23</option>
+  <option value ="24">24</option>
+  <option value ="25">25</option>
+  <option value ="26">26</option>
+  <option value ="27">27</option>
+  <option value ="28">28</option>
+  <option value ="29">29</option>
+  <option value ="30">30</option>
+  <option value ="31">31</option>
+</select>
+</td>
+<td>Local Time:</td>
+<td><input readonly type="text" name="hrs_display" size="2"/></td>
+<td>:</td>
+<td><input readonly type="text" name="min_display" size="2"/></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><input TYPE="button" NAME="dec_hour" VALUE="-1" onClick="adj_hrs(1)"></td>
+<td>&nbsp;</td>
+<td><input TYPE="button" NAME="dec_min" VALUE="-10" onClick="adj_min(1)"></td>
+</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+ima = new Date();
+document.my_form.hrs_display.value = "12"; //insert real hrs
+document.my_form.min_display.value = "00";//insert real mins
+document.my_form.year_display.selectedIndex = ima.getFullYear()-2008;
+document.my_form.month_display.selectedIndex = ima.getMonth();
+document.my_form.day_display.selectedIndex = ima.getDate()-1;
+
+function initialize(hrs) // this is now the main call.  It calcuates the time, and the azimuth.
+{
+	
+	if (GBrowserIsCompatible()) {
+
+	var vistas = ldVistas();
+	//document.getElementById("dbg").innerHTML += "vistas[0].lat1 = " + vistas[0].lat1 + "<br>";
+	//document.getElementById("dbg").innerHTML += "vistas[0].lon1 = " + vistas[0].lon1 + "<br>";
+	var dtY2K = getDTY2K(hrs);
+	//document.getElementById("dbg").innerHTML += "dtY2K = " + dtY2K + "<br>";
+	var pers = getPers(vistas,dtY2K);
+	//document.getElementById("dbg").innerHTML += "pers[0].html = " + pers[0].html + "<br>";
+	
+	var map = new GMap2(document.getElementById("map_canvas"));
+        var picLoc = new GLatLng(38.749121606282614,-121.28793597221375);
+        map.setCenter(picLoc, 14);
+        map.addControl(new GSmallMapControl());
+	map.addControl(new GMapTypeControl());
+	
+	var myMarker = new Array();
+	for(var j=0;j<pers.length;j++){
+		//document.getElementById("dbg").innerHTML += "j = " + j + "<br>";
+		//document.getElementById("dbg").innerHTML += "pers[j].html = " + pers[j].html + "<br>";
+		
+		map.addOverlay(createMarker(pers[j].marker.getLatLng(),pers[j].html));
+
+		map.addOverlay(pers[j].polyline);
+	}
+  } // end of if statement
+  } //end of function
+
+function ldVistas(){
+// Always from Right to Left.
+var photoSpot1 = { 
+lat1 : 38.754300811588024,
+lon1 : -121.28526449203491,
+lat2 : 38.75694465519796,
+lon2 : -121.28792524337769,
+dest1 : "Roseville",
+dest2 : "Marysville",
+locName: "East Valley Mainline viewed from Lincoln St.<br>"
+};
+
+var photoSpot2 = { 
+lat1 : 38.749121606282614,
+lon1 : -121.28793597221375,
+lat2 : 38.74963201315676,
+lon2 : -121.28621935844421,
+dest1 : "Sacramento",
+dest2 : "Roseville",
+locName: "Roseville Station tracks viewed from Amtrak Platform.<br>"
+};
+
+var photoSpot3 = { 
+lat1 : 38.74963201315676,
+lon1 : -121.28566145896912,
+lat2 : 38.74764879706285,
+lon2 : -121.28822028636932,
+dest1 : "Roseville",
+dest2 : "Sacramento",
+locName: "Roseville Mainline viewed from West Atlantic St.<br>"
+};
+
+var vistas =  [photoSpot1, photoSpot2, photoSpot3]; 
+
+return vistas;
+}  
+
+
+function calcY2K(y, m,  d){
+//y=1990;m=4;d=19; //should yield -3543
+//document.write("<br>");
+//document.write(y);
+//document.write("<br>");
+//document.write(m);
+//document.write("<br>");
+//document.write(d);
+//document.write("<br>");
+//document.write("calculating<br>");
+//document.write(Math.floor(2.5));
+//document.write("<br>");
+var Y2K = 367*y-Math.floor((7*(y+Math.floor(((m+9)/12))))/4)+Math.floor((275*m)/9)+d-730530;
+//int Y2K = 367*y-(int)((7*(y+(int)(((m+9)/12))))/4)+(int)((275*m)/9)+d-730530;
+//document.write(Y2K);
+//document.write("<br>");
+return Y2K;
+}
+
+
+
+//calculates solar az and el based on dateTime (fractional days afer y2k UTC, lat, and lon
+function azelCalc(dateTime, observerLat, observerLon){
+
+//document.write("In azelCalc<br>");
+//document.write("dateTime = " + dateTime  + "<br>");
+//document.write("observerLat = " + observerLat  + "<br>");
+//document.write("observerLon = " + observerLon  + "<br>");
+//document.write("<br>");
+
+
+//double azel[] = new double[2];
+var azel = {az:0.0, el:0.0}
+//double pi=3.1415926353;
+//document.write("define azel<br>");
+//test case 19 april 1990 0 hrs UTC
+//dateTime = -3543;
+
+var speedolite = 3.06e8;
+var avagadro = 6.02e-23;
+//document.write("c = " + speedolite + ", avagadro = " + avagadro);
+//document.write("<br>");
+
+
+var w=282.9404+(4.70935e-5)*dateTime;
+//document.write("w = " + w  + "<br>");
+var a=1.0;
+var e = 0.016709-(1.151e-9)*dateTime;
+var m0=356.047+0.9856002585*dateTime;
+var m=m0-Math.floor((m0/360))*360;// check the order on this ???
+//m0 should equal -3135.9347? here 
+//document.write("m0 = " + m0  + "<br>");
+var o=23.4393-(3.563e-7)*dateTime;
+var l=w+m;
+if (m<0){m=m+360;}
+//document.write("m = " + m  + "<br>");
+var ee=m+(180/Math.PI)*e*Math.sin(m*Math.PI/180)*(1+e*Math.cos(m*Math.PI/180));
+var x=Math.cos(ee*Math.PI/180)-e;
+var y=Math.sin(ee*Math.PI/180)*Math.sqrt(1-e*e);
+var r=Math.sqrt(x*x+y*y);
+var v=Math.atan(y/x)*180/Math.PI;
+var ys=1;
+if(y<0){ys=(-1);}
+if(x<0){v=v+180*ys;}
+var lon=(v+w)-Math.floor((v+w)/360)*360;
+if(lon<0){lon=lon+360;}
+//x should be 0.881048
+x=r*Math.cos(lon*Math.PI/180);
+//y should be 0.482098
+y=r*Math.sin(lon*Math.PI/180);
+var z=0;
+var xq=x;
+var yq=y*Math.cos(o*Math.PI/180);
+var zq=y*Math.sin(o*Math.PI/180);
+
+//ra should be 26.6580
+var ra=Math.atan(yq/xq)*180/Math.PI;
+ys=1;
+if(yq<0){ys=(-1);}
+if(xq<0){ra=ra+180*ys;}
+//decl should be 11.0084
+var decl=Math.asin(zq/r)*180/Math.PI;
+
+//calcs for lat = 60 and lon = 15
+//observerLat = 60;
+//observerLon = 15;
+var g0=l/15+12;
+if(g0<0){g0=g0+24;}
+if(g0>24){g0=g0-24;}
+var st=g0+(dateTime-Math.floor(dateTime))*24+observerLon/15; // we need univeral time! -get it from the fractional part of d * 24.
+var ha=st*15-ra;
+x=Math.cos(ha*Math.PI/180)*Math.cos(decl*Math.PI/180);
+y=Math.sin(ha*Math.PI/180)*Math.cos(decl*Math.PI/180);
+z=Math.sin(decl*Math.PI/180);
+xq=x*Math.sin(observerLat*Math.PI/180)-z*Math.cos(observerLat*Math.PI/180); // check the trig - is at deg or rad?
+yq=y;
+zq=x*Math.cos(observerLat*Math.PI/180)+z*Math.sin(observerLat*Math.PI/180);
+
+var az=Math.atan(yq/xq)*180/Math.PI;
+ys=1;
+if(yq<0) ys=(-1);
+if(xq<0){az=az+180*ys;}
+az=az+180;
+var el=Math.asin(zq)*180/Math.PI;
+//az=15.68
+//el=-17.96
+//azel[0]=(double)az;
+//azel[1]=(double)el;
+//document.write("<br>");
+//document.write("<br>");
+//document.write("az = " + az  + "<br>");
+//document.write("el = " + el  + "<br>");
+//document.write("<br>");
+
+azel.az = az;
+azel.el = el;
+//document.write("azel:az = " + azel.az + "<br>");
+//document.write("azel:el = " + azel.el + "<br>");
+//document.write("<br>");
+return azel;
+}
+
+
+function createMarker(point, text) {
+    //var marker = new GMarker(point, markerOptions);
+    var marker = new GMarker(point);
+    GEvent.addListener(marker, "click", function() {
+            marker.openInfoWindowHtml(text);
+        });
+		return marker;
+    }
+		
+  
+function getDTY2K(hrs){
+  now = new Date();
+  var  dY2K = calcY2K(document.my_form.year_display.selectedIndex+2008, document.my_form.month_display.selectedIndex+1,document.my_form.day_display.selectedIndex+1);
+  todHrsLCL = hrs;
+  todHrsUTC = todHrsLCL + now.getTimezoneOffset()/60;
+  var dtY2K = dY2K + todHrsUTC/24.000;
+  return dtY2K  
+}
+
+
+function adj_hrs(the_button)
+{
+  if(the_button == 0)
+  {
+	if((parseInt(document.my_form.hrs_display.value) + 1) == 24){
+		document.my_form.hrs_display.value = 0+'';
+	}
+	else{
+		document.my_form.hrs_display.value = (parseInt(document.my_form.hrs_display.value) + 1)+'';
+	}
+	initialize(parseInt(document.my_form.hrs_display.value)+ parseInt(document.my_form.min_display.value)/60);
+  }
+  if(the_button == 1)
+  {
+	if((parseInt(document.my_form.hrs_display.value) - 1) == -1){
+		document.my_form.hrs_display.value = 23+'';
+	}
+	else{
+		document.my_form.hrs_display.value = (parseInt(document.my_form.hrs_display.value) - 1)+'';
+	}
+	initialize(parseInt(document.my_form.hrs_display.value)+ parseInt(document.my_form.min_display.value)/60);
+  }
+}
+function adj_min(the_button)
+{
+  if(the_button == 0)
+  {
+	if((parseInt(document.my_form.min_display.value) + 10) == 60){
+		document.my_form.min_display.value = '00';
+		//incriment hours too.
+		if((parseInt(document.my_form.hrs_display.value) + 1) == 24){
+			document.my_form.hrs_display.value = 0+'';
+		}
+		else{
+			document.my_form.hrs_display.value = (parseInt(document.my_form.hrs_display.value) + 1)+'';
+		}
+	}
+	else{
+		document.my_form.min_display.value = (parseInt(document.my_form.min_display.value) + 10)+'';
+	}
+	initialize(parseInt(document.my_form.hrs_display.value)+ parseInt(document.my_form.min_display.value)/60);
+  }
+  if(the_button == 1)
+  {
+	if((parseInt(document.my_form.min_display.value) - 10) == -10){
+		document.my_form.min_display.value = 50+'';
+		//decriment hours too.
+		if((parseInt(document.my_form.hrs_display.value) - 1) == -1){
+			document.my_form.hrs_display.value = 23+'';
+		}
+		else{
+			document.my_form.hrs_display.value = (parseInt(document.my_form.hrs_display.value) - 1)+'';
+		}
+	}
+	else if((parseInt(document.my_form.min_display.value) - 10) == 0){
+		document.my_form.min_display.value = '00';
+	}
+	else{
+		document.my_form.min_display.value = (parseInt(document.my_form.min_display.value) - 10)+'';
+	}
+	initialize(parseInt(document.my_form.hrs_display.value)+ parseInt(document.my_form.min_display.value)/60);
+  }
+}
+function calendar_change()
+{
+	initialize(parseInt(document.my_form.hrs_display.value)+ parseInt(document.my_form.min_display.value)/60);
+}
+
+
+function getPers(vistas,dtY2K){
+// Rumb line calcuations (more accurate) can be found at: 
+// Calculate distance, bearing and more between two Latitude/Longitude points
+// by Chris Veniss scripts@movable-type.co.uk
+// http://www.movable-type.co.uk/scripts/latlong.html
+// 
+//var dPhi = Math.log(Math.tan(lat2/2+Math.PI/4)/Math.tan(lat1/2+Math.PI/4));
+//var q = (Math.abs(dLat) > 1e-10) ? dLat/dPhi : Math.cos(lat1);
+// if dLon over 180° take shorter rhumb across 180° meridian:
+//if (Math.abs(dLon) > Math.PI) {
+//  dLon = dLon>0 ? -(2*Math.PI-dLon) : (2*Math.PI+dLon);
+//}
+//var d = Math.sqrt(dLat*dLat + q*q*dLon*dLon) * R;
+//var brng = Math.atan2(dLon, dPhi);
+
+//
+// 
+	//document.getElementById("dbg").innerHTML += " arctan lat 5 lon 2.5 = " + (Math.atan(5/2.5))*180/Math.PI + " arctan2 lat 5 lon 2.5 = " + (Math.atan2(5,2.5))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat 2.5 lon 5 = " + (Math.atan(2.5/5))*180/Math.PI + " arctan2 lat 2.5 lon 5 = " + (Math.atan2(2.5,5))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat -1 lon 5 = " + (Math.atan(-1/5))*180/Math.PI + " arctan2 lat -1 lon 5 = " + (Math.atan2(-1,5))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat -5 lon 1 = " + (Math.atan(-5/1))*180/Math.PI + " arctan2 lat -5 lon 1 = " + (Math.atan2(-5,1))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat -5 lon -3 = " + (Math.atan(-5/-3))*180/Math.PI + " arctan2 lat -5 lon -3 = " + (Math.atan2(-5,-3))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat -3 lon -5 = " + (Math.atan(-3/-5))*180/Math.PI + " arctan2 lat -3 lon -5 = " + (Math.atan2(-3,-5))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat 2 lon -5 = " + (Math.atan(2/-5))*180/Math.PI + " arctan2 lat 2 lon -5 = " + (Math.atan2(2,-5))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " arctan lat 5 lon -2 = " + (Math.atan(5/-2))*180/Math.PI + " arctan2 lat 5 lon -2 = " + (Math.atan2(5,-2))*180/Math.PI + "<br>";
+	//document.getElementById("dbg").innerHTML += " test = " + (270-63) % 360 + "<br>";
+	//document.getElementById("dbg").innerHTML += " test = " + (270-111) % 360 + "<br>";
+
+	var pers = new Array();
+	for(var i=0;i<vistas.length;i++){
+		var deltaLat = (vistas[i].lat2-vistas[i].lat1);
+		//document.getElementById("dbg").innerHTML += "delta lat(" + i + ") = " + deltaLat + "<br>";
+		var deltaLon = (vistas[i].lon2-vistas[i].lon1);
+		var theta = (Math.atan2(deltaLat,deltaLon))*180/Math.PI;
+		//document.getElementById("dbg").innerHTML += "theta(" + i + ") = " + theta + "<br>";
+		// Correction needed: Lon needs to be adjusted by lat!!!
+		//document.getElementById("dbg").innerHTML += "pre-correction delta lon(" + i + ") = " + deltaLon + "<br>";
+		deltaLon = deltaLon*Math.cos((vistas[i].lat1)*Math.PI/180);
+		//document.getElementById("dbg").innerHTML += "post-correction delta lon(" + i + ") = " + deltaLon + "<br>";
+		//theta = (Math.atan(deltaLat/deltaLon))*180/Math.PI;
+		theta = (Math.atan2(deltaLat,deltaLon))*180/Math.PI;
+		//document.write("theta = " + theta + "<br>");
+		//document.getElementById("dbg").innerHTML += "corrected theta(" + i + ") = " + theta + "<br>";
+		
+		//var deltaLatPos = false;
+		//var deltaLonPos = false;
+		//if((vistas[i].lat2-vistas[i].lat1)>=0)deltaLatPos = true;
+		//if((vistas[i].lon2-vistas[i].lon1)>=0)deltaLonPos = true;
+
+		//if(deltaLatPos && deltaLonPos) var heading = 90 - theta; //Q I
+		//if(deltaLatPos && !deltaLonPos) var heading = 0 - theta; //Q IV theta negative //(fixed 090523) changed from + to -
+		//if(!deltaLatPos && deltaLonPos) var heading = 180 + theta; //Q II theta negative
+		//if(!deltaLatPos && !deltaLonPos) var heading = 270 - theta; //Q III
+		//document.write("heading = " + heading + "<br>");
+		var heading = 90 - theta
+		if(heading<0)heading+=360;
+		
+		//document.getElementById("dbg").innerHTML += "heading(" + i + ") = " + heading + "<br>";	
+
+		var bearing  = heading + 270; // bearing is the normal direction from track to photographer.
+		//document.getElementById("dbg").innerHTML += "bearing(" + i + ") = " + bearing + "<br>";	
+		if(bearing>=360)bearing-=360;
+		//document.write("bearing = " + bearing + "<br>");
+		var myLoc = azelCalc(dtY2K, vistas[i].lat1, vistas[i].lon1); //make this an average of the two points some day....
+		//document.write("myLoc.az = " + myLoc.az + "<br>");
+		//document.write("myLoc.el = " + myLoc.el + "<br>");
+		//document.getElementById("dbg").innerHTML += "bearing(" + i + ") = " + bearing + "<br>";	
+		if(i==0) {
+      //document.getElementById("dbg").innerHTML += "DateTimeY2k = " + dtY2K + "myLoc.az(" + i + ") = " + myLoc.az + "   myLoc.el(" + i + ") = " + myLoc.el + "<br>";	
+      plotSun(myLoc.az,myLoc.el);
+      }
+		//document.getElementById("dbg").innerHTML += "<br>";	
+
+		var dirCase = 0;
+		if((bearing-myLoc.az)>0 && (bearing-myLoc.az)<90) dirCase = 1;
+		if((bearing-myLoc.az)<0 && (bearing-myLoc.az)>-90) dirCase = 2;
+
+		//document.write("direction = " + dirCase + "<br>");
+
+		var mark = new GMarker(new GLatLng(0.0,0.0));
+		var lineColor = "#000000";
+		var h = 'hello';
+		if(myLoc.el>0)
+		{
+			lineColor = "#ff0000";
+			if(dirCase == 1){
+       if(myLoc.el<30) lineColor = "#00ff00";
+       else lineColor = "#0000ff";
+				var mark = new GMarker(new GLatLng(vistas[i].lat1,vistas[i].lon1));
+				h = '<div style="width: 210px; padding-right: 10px">' + vistas[i].locName + '<br>Train: ' + vistas[i].dest1 + ' bound<\/div>';
+				}
+			if(dirCase == 2){
+       if(myLoc.el<30) lineColor = "#00ff00";
+       else lineColor = "#0000ff";
+  			var mark = new GMarker(new GLatLng(vistas[i].lat2,vistas[i].lon2));
+				h = '<div style="width: 210px; padding-right: 10px">' + vistas[i].locName + '<br>Train: ' + vistas[i].dest2 + ' bound<\/div>';
+				}
+		}
+		var poly = new GPolyline([
+			new GLatLng(vistas[i].lat1, vistas[i].lon1),
+			new GLatLng(vistas[i].lat2, vistas[i].lon2)
+			], lineColor, 10);
+		
+		//document.getElementById("dbg").innerHTML += "line color = " + lineColor + "<br>";
+		pers[i]={polyline:poly,marker:mark,html:h};
+	}
+return pers;
+}
+
+function plotSun(az,el){
+
+var data_string = "chd=t:";
+var axis_string = "chxl=0:|N";
+
+//220 points = 1432 char. may be too many. try compression.
+var numPts = 180;
+var ptDelta = 360/numPts
+for(var i=0;i<numPts;i++){
+if(el>0 && az>(ptDelta*i) && az<(ptDelta*(i+1))) data_string += 90-el + ","
+else data_string += "-1,";
+}
+data_string += "-1&";
+
+for(var i=0;i<numPts-1;i++){
+if(i*2==44) axis_string += "NE|";
+else if(i*2==90) axis_string += "E|"; //normalize to numpts?
+else if(i*2==136) axis_string += "SE|";
+else if(i*2==180) axis_string += "S|";
+else if(i*2==224) axis_string += "SW|";
+else if(i*2==270) axis_string += "W|";
+else if(i*2==316) axis_string += "NW|";
+else axis_string += "|";
+}
+axis_string += "1:|90|60|30|0";
+//axis_string = "chxl=0:|N||| ||| |||E||| ||| |||S||| ||| |||W||| ||| |||1:|90|60|30|0"
+//document.getElementById("dbg").innerHTML += data_string; 
+//document.getElementById("dbg").innerHTML += axis_string; 
+
+var bg_string = "chf=bg,s,BDEDFF";
+if(el>0) bg_string = "chf=bg,s,BDEDFF";
+else bg_string = "chf=bg,s,e0e0e0";
+
+document.getElementById("plot_canvas").innerHTML 
+  = '<img src="http://chart.apis.google.com/chart?'
+  + 'cht=r&'
+  + 'chs=200x200&'
+  + data_string
+  //+ 'chd=t:-1,-10,-20,-30,-40,-50,-60,-70,-80,85,-100,-110,-120,30,60,-160,-170,-180,-190,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1&'
+  + 'chds=0,90&'
+  + 'chm=o,FFCC33,0,-1,20,0&'
+  + 'chxt=x,r&'
+  + axis_string
+  + '&'
+  + bg_string
+  + '">'
+}
+
+
+</script>
+
+<div id="map_canvas" style="width: 500px; height: 300px"></div>
+
+<table border=0>
+<tr>
+<td>
+<h3 align="center">Solar Position</h3>
+<div id='plot_canvas'></div>
+</td>
+<td>
+<h3 align="center">Map Information</h3>
+<PRE>
+   <b>Marker Indicators</b>
+   Marker indicates best direction for train movement.
+   Click marker for information about photo location.
+<br>
+   <b>Color Key</b>
+   Blue: Sun elevation higher than 30 degrees.
+   Green: Sun elevation lower than 30 degrees.
+   Red: Unsatisfactory Lighting
+   Gray: Sun Below Horizon
+</pre>
+</td>
+</tr>
+</table>
+<div id='dbg'></div>
+</body>
+</html>
