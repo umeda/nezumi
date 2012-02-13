@@ -7,16 +7,22 @@
 
 int ledPin = 7; // transistor base driver connected to pin 7
 int val = 0;
-int batt01 = 1023;
-int batt02 = 1023;
-int batt03 = 1023;
-int batt04 = 1023;
+float batt01 = 1023;
+float batt02 = 1023;
+float batt03 = 1023;
+float batt04 = 1023;
+float vref;
 int mins = 0;
 int secs = 0;
 //int vMin = 829;
-int vMin = 1025/5;
+float vMin = 1.1;
 int timeStart;
 float minElapsed;
+int a0;
+int a1;
+int a2;
+int a3;
+int a4;
 
 void setup()
 {
@@ -44,17 +50,42 @@ val = 0;
     delay(1000);
     delay(1000);
     delay(1000);
-     batt01 = analogRead(0);
-     batt02 = analogRead(1)-batt01;
-     batt03 = analogRead(2)-batt02-batt01;
-     batt04 = analogRead(3)-batt03-batt02-batt03+1025/5;
+    delay(1000);
+    delay(1000);
+     
+     
+     a0 = analogRead(0);
+     a1 = analogRead(1);
+     a2 = analogRead(2);
+     a3 = analogRead(3);
+     a4 = analogRead(4);
+ 
+     batt01 = (float)a0 * 2.5 / (float)a4;
+     batt02 = (float)a1 * 2.5 / (float)a4 - batt01;
+     batt03 = (float)a2 * 2.5 / (float)a4 - batt02 - batt01;
+     batt04 = (float)a3 * 2.5 / (float)a4 - batt03 - batt02 - batt01 + 0.96;
+     vref = float(a4)*5/1024.0;
     
     Serial.print("#");
-    Serial.print("vMin = ");
-    Serial.println(vMin);
+    Serial.print("a0 = ");
+    Serial.println(a0);    
+    Serial.print("#");
+    Serial.print("a1 = ");
+    Serial.println(a1);
+    Serial.print("#");
+    Serial.print("a2 = ");
+    Serial.println(a2);
+    Serial.print("#");
+    Serial.print("a3 = ");
+    Serial.println(a3);
+    Serial.print("#");
+    Serial.print("a4 = ");
+    Serial.println(a4);
+    Serial.println(" ");
+     
     Serial.print("#");
     Serial.print("batt01 = ");
-    Serial.println(batt01);
+    Serial.println(batt01);    
     Serial.print("#");
     Serial.print("batt02 = ");
     Serial.println(batt02);
@@ -64,14 +95,32 @@ val = 0;
     Serial.print("#");
     Serial.print("batt04 = ");
     Serial.println(batt04);
+    Serial.print("#");
+    Serial.print("Vref = ");
+    Serial.println(vref);
+    Serial.print("#");
+    Serial.print("correction factor = ");
+    Serial.println(2.5 / vref);
     
+    Serial.println(" ");
+    Serial.println(" ");
+    Serial.println(" ");
 
   while((batt01 > vMin) && (batt02 > vMin) && (batt03 > vMin) && (batt04 > vMin) && (Serial.read() != '#')){  
      delay(1000);
-     batt01 = analogRead(0);
-     batt02 = analogRead(1)-batt01;
-     batt03 = analogRead(2)-batt02-batt01;
-     batt04 = analogRead(3)-batt03-batt02-batt03+1025/5;
+
+
+     a0 = analogRead(0);
+     a1 = analogRead(1);
+     a2 = analogRead(2);
+     a3 = analogRead(3);
+     a4 = analogRead(4);
+ 
+     batt01 = (float)a0 * 2.5 / (float)a4;
+     batt02 = (float)a1 * 2.5 / (float)a4 - batt01;
+     batt03 = (float)a2 * 2.5 / (float)a4 - batt02 - batt01;
+     batt04 = (float)a3 * 2.5 / (float)a4 - batt03 - batt02 - batt01 + 0.96;
+     vref = float(a4)*5/1024.0;
      
 // comment this next line out as well as its corresponding brace and mins will actually be equal to secs. 
 //     if (secs > 59) {  
@@ -84,20 +133,22 @@ val = 0;
         printFloat((float)minElapsed,3);
         Serial.print("   ");
         Serial.print(batt01);
-        Serial.print("   ");
-        printFloat((float)batt01*5.0/1023.0,3);
+        //Serial.print("   ");
+        //printFloat((float)batt01*5.0/1023.0,3);
         Serial.print("   ");
         Serial.print(batt02);
-        Serial.print("   ");
-        printFloat((float)batt02*5.0/1023.0,3);
+        //Serial.print("   ");
+        //printFloat((float)batt02*5.0/1023.0,3);
         Serial.print("   ");
         Serial.print(batt03);
-        Serial.print("   ");
-        printFloat((float)batt03*5.0/1023.0,3);
+        //Serial.print("   ");
+        //printFloat((float)batt03*5.0/1023.0,3);
         Serial.print("   ");
         Serial.print(batt04);
+        //Serial.print("   ");
+        //printFloat((float)batt04*5.0/1023.0,3);
         Serial.print("   ");
-        printFloat((float)batt04*5.0/1023.0,3);
+        Serial.print(vref);
         Serial.println("");
         mins += 1;
         secs = 0;
