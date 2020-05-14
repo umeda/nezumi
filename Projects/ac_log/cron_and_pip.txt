@@ -1,0 +1,27 @@
+*/30 *  *   *   *     python3 /home/pi/ac_log/ac_sheet.py
+
+
+pi@raspberrypi:~ $ pip3 freeze
+Adafruit-DHT==1.3.2
+certifi==2018.4.16
+chardet==3.0.4
+cryptography==1.7.1
+gspread==3.0.0
+httplib2==0.11.3
+idna==2.6
+keyring==10.1
+keyrings.alt==1.3
+oauth2client==4.1.2
+pyasn1==0.4.3
+pyasn1-modules==0.2.1
+pycrypto==2.6.1
+pygobject==3.22.0
+python-apt==1.1.0b5
+pyxdg==0.25
+requests==2.18.4
+rsa==3.4.2
+SecretStorage==2.3.1
+six==1.11.0
+urllib3==1.22
+pi@raspberrypi:~ $ 
+
