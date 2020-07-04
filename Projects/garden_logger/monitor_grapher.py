@@ -1,3 +1,23 @@
+'''
+Monitor Grapher v0.1
+
+Plots Sunlight Logger data from CSV file.
+
+   Copyright 2020 Nezumi Workbench
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+'''   
+
 import csv
 from pprint import pprint
 from datetime import datetime
@@ -39,8 +59,10 @@ with open('GARDEN.CSV') as csvfile:
             # place a text box in middle top in axes coords
             ax.text(0.20, 0.95, textstr, transform=ax.transAxes, fontsize=11, verticalalignment='top', bbox=props)
 
+            title = f"{dataSet['title']}\n{run_date}"
+
             ax.plot(np.array(dataSet['dateTimes']),np.array(dataSet['resistances']))
-            ax.set(xlabel='time', ylabel='resistance (ohms)', title=dataSet['title'])
+            ax.set(xlabel='time', ylabel='resistance (ohms)', title=title)
             xfmt = mdates.DateFormatter('%H:%M')
             ax.xaxis.set_major_formatter(xfmt)
             # ax.xaxis.set_major_formatter(hours_fmt)
@@ -62,6 +84,7 @@ with open('GARDEN.CSV') as csvfile:
         else:
             dateTimes.append(datetime.strptime(row[0], '%Y/%m/%dT%H:%M:%S'))
             resistances.append(float(row[1]))
+            run_date = datetime.strptime(row[0], '%Y/%m/%dT%H:%M:%S').strftime("%Y/%m/%d")
             if float(row[1]) < FS_THRESHOLD:
                 if not foundStartTime:
                     timeStart = datetime.strptime(row[0], '%Y/%m/%dT%H:%M:%S').strftime("%H:%M")
@@ -69,5 +92,6 @@ with open('GARDEN.CSV') as csvfile:
                 timeStop = datetime.strptime(row[0], '%Y/%m/%dT%H:%M:%S').strftime("%H:%M")
                 fsMins += 1
                 fsHrs = "{:.1f}".format(fsMins/60)
+
 
 pprint(dataSets)
