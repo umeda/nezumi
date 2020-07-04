@@ -10,10 +10,10 @@
   A 10K resistor is connected between A0 and +5
   
   The SD card is attached to the SPI bus as follows:
-     ** MOSI - pin 11
-     ** MISO - pin 12
-     ** CLK - pin 13
-     ** CS - pin 10 (for HiLetGo data logger)
+     MOSI - pin 11
+     MISO - pin 12
+     CLK - pin 13
+     CS - pin 10 (for HiLetGo data logger)
 
    Copyright 2020 Nezumi Workbench
 
