@@ -10,4 +10,6 @@ virtualenv .venv -p python3<br>
 source .venv/bin/activate<br>
 pip install -r requirements.txt
 </code>
+![Radiation Pattern](radiation_pattern_146_MHz.png)
+![VSWR](vswr_146_MHz.png)
 
