@@ -13,79 +13,72 @@ import math
 
 # creation of a nec context
 context=nec_context()
-
 # get the associated geometry
 geo = context.get_geometry()
 
-# nec = context_clean(nec_context())
-# nec.set_extended_thin_wire_kernel(True)
+#Design Parameters
+freq = 146.520  # Design Frequency in MHz
+wire_diameter_mm = 2  # Element Diameter in mm
+element_spacing = [0.25, 0.25]  # spacing from reflector in wavelengths- reflector to driven, driven to director 1, director 1 to director 2, etc.
+element_factor = [1.04, 0.96]  # percentage of driven element length - reflector, director 1, director2, etc
 
-# geo = geometry_clean(nec.get_geometry())
-
-#add wires to the geometry
-freq = 146.520
-length_ft = 468.0 / freq
-drv_len = length_ft * 12 * 25.4 / 1000  #  driven element length in meters
+# Derived Values
+wire_rad = wire_diameter_mm / 2000 
+length_ft = 468.0 / freq # dipole formula from ARRL
+drv_len = length_ft * 12 * 25.4 / 1000  #  driven element length in meters.
 print(drv_len)
-num_segs = 35
-tag_num = 1
-wire_rad = 0.001
+num_segs = 35 # Number of segments per Element. More segments = increased accuracy and longer processing time.
+excitation_element_num = 1 #  Element to which excitation is applied.
 
-# throw in a polarization variable
-dipole_tag = 1
+# Add Elements
+element_tag = 1
 center      = np.array([0, 0, 0])
 half_height = np.array([0  , 0, drv_len/2.0])
 top         = center + half_height
 bottom      = center - half_height
 nr_segments = 35
-geo.wire(dipole_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
-# examples 
+geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 # geo.wire(tag, num_segs, x1, y1, z1, x2, y2, z2, radius, rtap, rrad)
-# geo.wire(tag_num, num_segs, drv_len / 2 , 0, 0, -(drv_len / 2), 0, 0, 0.001, 1.0, 1.0)
 
 
 #reflector
-ref_len = drv_len * 1.04
-pos = -1 * ref_len * 0.5
-dipole_tag = 2
-center      = np.array([pos, 0, 0])
+ref_len = drv_len * element_factor[0]
+pos = -1 * ref_len * 2 * element_spacing[0]  # negative because it's behind the driven element
+element_tag = 2
+center      = np.array([pos, 0, 0]) # back
 half_height = np.array([0  , 0, ref_len/2.0])
 top         = center + half_height
 bottom      = center - half_height
 nr_segments = 35
-geo.wire(dipole_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
+geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
 #director
-dir_len = drv_len * 0.96
-pos = dir_len * 0.5
-dipole_tag = 3
+dir_len = drv_len * element_factor[1]
+pos = dir_len * 2 * element_spacing[1]
+element_tag = 3
 center      = np.array([pos, 0, 0])
 half_height = np.array([0  , 0, dir_len/2.0])
 top         = center + half_height
 bottom      = center - half_height
 nr_segments = 35
-geo.wire(dipole_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
+geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
-# compare these to the app.
-
-#add wires to the geometry
-# geo.wire(0, 36, 0, 0, 0, -0.042, 0.008, 0.017, 0.001, 1.0, 1.0)
-
-brass_conductivity = 15600000 # mhos
+brass_conductivity = 15600000 # mhos - Need to figure out how to use this.
 # nec.set_wire_conductivity(brass_conductivity)
 
 context.geometry_complete(0)
 
-context.gn_card(-1, 0, 0, 0, 0, 0, 0, 0)
+
+# ground card 
+context.gn_card(-1, 0, 0, 0, 0, 0, 0, 0)  # no ground - floating in free space!
 
 #add a "ex" card to specify an excitation
-#
 center_seg = int((num_segs + 1) / 2) + 1
 print(f'Center Segment = {center_seg} of {num_segs}')
-context.ex_card(0, tag_num, center_seg, 0, 0, 0, 0, 0, 0, 0, 0)
+context.ex_card(0, excitation_element_num, center_seg, 0, 0, 0, 0, 0, 0, 0, 0)
 
 #add a "fr" card to specify the frequency 
-context.fr_card(0, 0, freq, 1)
+context.fr_card(0, 0, freq, 1) # single frequency to calculate radiation pattern.
 
 #add a "rp" card to specify radiation pattern sampling parameters and to cause program execution
 '''
@@ -152,8 +145,6 @@ phi_0 = 0.0  # from the horizontal (x) axis
 theta_d = 4.0
 phi_d = 4.0
 
-
-
 context.rp_card(0, num_thetas, num_phis, 0, norm, pd, avg, theta_0, phi_0, theta_d, phi_d, 1.0, 0.0)
 
 #get the radiation_pattern
@@ -173,7 +164,47 @@ ax = plt.subplot(111, polar=True)
 ax.plot(thetas, gains[:,0], color='r', linewidth=3)
 ax.grid(True)
 
-ax.set_title("6 element NBS yagi - side view", va='bottom')
-plt.savefig('RadiationPattern.png')
+ax.set_title("3 element NBS yagi - side view", va='bottom')
+plt.savefig("radiation_pattern_%i_MHz.png" % freq)
 plt.show()
 
+system_impedance = 50  
+start_freq = 140
+stop_freq = 150
+freq_points = 100
+context.fr_card(0, freq_points, start_freq, (stop_freq-start_freq)/freq_points)
+# ifrq_linear_step, count, start_frequency, step_size
+context.xq_card(0) # Execute simulation
+# TODO: add get_n_items to nec_antenna_input and co, so we can automatically deduce count etc. Much cleaner
+
+# rng = matched_range_around(context, count, design_freq_mhz, system_impedance)
+# if rng[0] is None or rng[1] is None:
+#     print("VSWR is nowhere <= 2 @ %i Ohm!" % system_impedance)
+# else:
+#     bandwidth = 100.0 * (rng[1] - rng[0]) / design_freq_mhz
+#     print("The fractional bandwidth @ %i Ohm is %2.2f%% - %i MHz (%i Mhz to %i MHz)" % (system_impedance, bandwidth, (rng[1] - rng[0]), rng[0], rng[1]))
+
+
+#context.get input parameters could be very useful in debugging
+freqs = []
+vswrs = []
+blah = context.get_input_parameters(0)
+for idx in range(1, freq_points):
+    ipt = context.get_input_parameters(idx)
+    z = ipt.get_impedance()
+
+    freqs.append(ipt.get_frequency() / 1000000)
+    vswrs.append(vswr(z, system_impedance))
+        
+    print(f"freq =  {ipt.get_frequency()}, SWR = {vswr(z, system_impedance)}, z = {system_impedance}")
+
+plt.figure()
+plt.plot(freqs, vswrs)
+plt.title("VSWR of a 3 element dipole for a %i Ohm system" % (system_impedance))
+plt.xlabel("Frequency (MHz)")
+plt.ylabel("VSWR")
+plt.grid(True)
+filename = "vswr_%i_MHz.png" % freq
+print("Saving plot to file: %s" % filename)
+plt.savefig(filename)
+plt.show()
