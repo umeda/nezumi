@@ -5,11 +5,10 @@ I wanted to add some comments to make the functions easier for me to use and to 
 
 To create the virtual environment in which to run the examples, do the following:
 
-<code>
 virtualenv .venv -p python3<br>
 source .venv/bin/activate<br>
-pip install -r requirements.txt
-</code>
+pip install -r requirements.txt<br>
+
 ![Radiation Pattern](radiation_pattern_146_MHz.png)
 ![VSWR](vswr_146_MHz.png)
 
