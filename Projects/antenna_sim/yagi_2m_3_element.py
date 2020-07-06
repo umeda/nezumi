@@ -161,12 +161,13 @@ phis = rp.get_phi_angles() * 3.1415 / 180.0
 import matplotlib.pyplot as plt
 
 ax = plt.subplot(111, polar=True)
-ax.plot(thetas, gains[:,0], color='r', linewidth=3)
+# TODO: np.roll hack needed to make antenna face the right way. Need to figure out why. 
+ax.plot(np.roll(thetas, 23) , gains[:,0], color='r', linewidth=3)
 ax.grid(True)
 
 ax.set_title("3 element NBS yagi - side view", va='bottom')
 plt.savefig("radiation_pattern_%i_MHz.png" % freq)
-plt.show()
+# plt.show()
 
 system_impedance = 50  
 start_freq = 140
@@ -175,17 +176,8 @@ freq_points = 100
 context.fr_card(0, freq_points, start_freq, (stop_freq-start_freq)/freq_points)
 # ifrq_linear_step, count, start_frequency, step_size
 context.xq_card(0) # Execute simulation
-# TODO: add get_n_items to nec_antenna_input and co, so we can automatically deduce count etc. Much cleaner
 
-# rng = matched_range_around(context, count, design_freq_mhz, system_impedance)
-# if rng[0] is None or rng[1] is None:
-#     print("VSWR is nowhere <= 2 @ %i Ohm!" % system_impedance)
-# else:
-#     bandwidth = 100.0 * (rng[1] - rng[0]) / design_freq_mhz
-#     print("The fractional bandwidth @ %i Ohm is %2.2f%% - %i MHz (%i Mhz to %i MHz)" % (system_impedance, bandwidth, (rng[1] - rng[0]), rng[0], rng[1]))
-
-
-#context.get input parameters could be very useful in debugging
+# context.get input parameters could be very useful in debugging
 freqs = []
 vswrs = []
 blah = context.get_input_parameters(0)
@@ -207,4 +199,4 @@ plt.grid(True)
 filename = "vswr_%i_MHz.png" % freq
 print("Saving plot to file: %s" % filename)
 plt.savefig(filename)
-plt.show()
+# plt.show()

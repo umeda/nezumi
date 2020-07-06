@@ -1,3 +1,4 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.pythonPath": "/home/tester/nezumi/Projects/antenna_sim/.venv/bin/python3.6"
 }
