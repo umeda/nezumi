@@ -9,6 +9,13 @@ virtualenv .venv -p python3<br>
 source .venv/bin/activate<br>
 pip install -r requirements.txt<br>
 
+If you have problems with any of the above steps, the libraries below may need to be installed.
+
+sudo apt-get install virtualenv<br>
+sudo apt-get install g++<br>
+sudo apt-get install python3-dev<br>
+
+
 ![Radiation Pattern](radiation_pattern_146_MHz.png)
 ![VSWR](vswr_146_MHz.png)
 
