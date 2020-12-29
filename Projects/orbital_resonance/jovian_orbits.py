@@ -76,14 +76,13 @@ fit[0][2] += 3.14159  # 180 degrees out of phase from europa
 io_fit = my_sine(q, *fit[0])
 
 plt.plot(days, ganymede, 'o', color = 'b')
-# plt.plot(days, europa, 'o', color = 'g')
-# plt.plot(days, io, 'o', color = 'r')
+plt.plot(days, europa, 'o', color = 'g')
+plt.plot(days, io, 'o', color = 'r')
 plt.plot(q, ganymede_fit, label=ganymede_msg, color = 'b')
-# plt.plot(q, europa_fit, label=europa_msg, color = 'g')
-# plt.plot(q, io_fit, label=io_msg, color = 'r')
+plt.plot(q, europa_fit, label=europa_msg, color = 'g')
+plt.plot(q, io_fit, label=io_msg, color = 'r')
 plt.xlabel('Days since intital observation')
 plt.ylabel('Distance from Jupiter (arc-seconds)')
 plt.title('Orbits of Jupiter\'s Moons')
 plt.legend()
 plt.show()
-
