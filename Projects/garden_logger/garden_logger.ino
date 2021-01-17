@@ -1,5 +1,5 @@
 /*
-  garden datalogger v0.2
+  garden datalogger v0.3
 
   This sketch logs one measurement per minute to an SD Card.
 
@@ -69,6 +69,7 @@ OneWire  ds1(3);  // on pin 3 (a 4.7K resistor is necessary)
 OneWire  ds2(4);  // on pin 4 (a 4.7K resistor is necessary)
 OneWire  ds3(5);  // on pin 5 (a 4.7K resistor is necessary)
 
+String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3";
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -79,24 +80,33 @@ void setup() {
 
 
   if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    Serial.flush();
+    // Serial.println("Couldn't find RTC");
+    // Serial.flush();
+    sendData("msg", "Couldn't find RTC.");
     abort();
   }
 
-  Serial.print("Initializing SD card...");
+  // Serial.print("Initializing SD card...");
+  sendData("msg", "Initializing SD card...");
 
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
-    Serial.println("Card failed, or not present");
+    // Serial.println("Card failed or not present.");
+    sendData("msg", "Card failed or not present.");
     // don't do anything more:
     while (1);
   }
-  Serial.println("card initialized.");
-
+  // Serial.println("card initialized.");
+  sendData("msg", "Card initialized.");
+  saveData(measurands);
+  
+  
   dht.begin();
   
+  
+  
   // get the file names and increment
+  
 
 }
 
@@ -131,22 +141,10 @@ void loop() {
   dataString += String(t2);
   dataString += ", ";
   dataString += String(t3);
-  
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  File dataFile = SD.open("garden.csv", FILE_WRITE);
 
-  // if the file is available, write to it:
-  if (dataFile) {
-    dataFile.println(dataString);
-    dataFile.close();
-    // print to the serial port too:
-    Serial.println(dataString);
-  }
-  // if the file isn't open, pop up an error:
-  else {
-    Serial.println("error opening gardenlog.csv");
-  }
+  saveData(dataString);
+  sendData("data, " + measurands, dataString);
+  
   delay(sampleMillis);
   delay(sampleMillis);
 }
@@ -157,6 +155,28 @@ void loop() {
 #################################################################
 */
 
+void saveData(String data){
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  File dataFile = SD.open("garden.csv", FILE_WRITE);
+
+  // if the file is available, write to it:
+  if (dataFile) {
+    dataFile.println(data);
+    dataFile.close();
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    // Serial.println("error opening gardenlog.csv");
+    sendData("msg", "error opening gardenlog.csv.");
+    }
+   }
+
+void sendData(String message, String data){
+    // print to the serial port:
+    Serial.println(message + ", " + data);
+    Serial.flush();
+    }
 
 float getTemp(OneWire ds) {
   byte i;

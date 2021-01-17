@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <link rel="stylesheet" href='/static/style.css' />
+        <style>
+        table, th, td {
+          border: 3px solid black;
+          border-collapse: collapse;
+        }
+        </style>
+        </head><body>
+<h1>Hello {{ name }}!</h1>
+<table>
+    <tr>
+        {% for header in headers %}    
+        <th class="c1">{{header}}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for data in datas %}    
+        <td class="c1">{{data}}</td>
+        {% endfor %}
+    </tr>
+    </table>
+</body>
+</html>
