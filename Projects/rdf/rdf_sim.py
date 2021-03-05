@@ -3,8 +3,8 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: RDF Simulator
-# Author: Phil KM6NFS
-# Generated: Tue Mar  2 22:42:57 2021
+# Author: Sodai Gomi
+# Generated: Thu Mar  4 20:15:24 2021
 ##################################################
 
 from distutils.version import StrictVersion
@@ -70,7 +70,6 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.shift_slider = shift_slider = 0
-        self.shift = shift = shift_slider
         self.samp_rate = samp_rate = 32000
         self.freq = freq = 500
 
@@ -156,14 +155,7 @@ class rdf_sim(gr.top_block, Qt.QWidget):
 
     def set_shift_slider(self, shift_slider):
         self.shift_slider = shift_slider
-        self.set_shift(self.shift_slider)
         self.blocks_multiply_const_vxx_0.set_k((complex(math.cos(self.shift_slider),math.sin(self.shift_slider)), ))
-
-    def get_shift(self):
-        return self.shift
-
-    def set_shift(self, shift):
-        self.shift = shift
 
     def get_samp_rate(self):
         return self.samp_rate
