@@ -29,7 +29,7 @@ print(f'Initial voltage = {initial_voltage}V')
 print('')
 
 print('Capacitor Dischage')
-print(f'TC\ttime\tvoltage')
+print('TC\ttime\tvoltage')
 for t in range(0, 6):
     voltage = e ** (-(t * tau)/tau)
     print(f'{t}\t{str(EngNumber(t * tau))}S\t{str(EngNumber(voltage, precision=1))}V')
