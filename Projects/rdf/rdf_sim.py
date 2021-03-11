@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: RDF Simulator
-# Generated: Sun Mar  7 21:51:44 2021
+# Generated: Mon Mar  8 22:16:40 2021
 ##################################################
 
 from distutils.version import StrictVersion
@@ -80,19 +80,19 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         self._shift_slider_win = RangeWidget(self._shift_slider_range, self.set_shift_slider, "shift_slider", "slider", float)
         self.top_layout.addWidget(self._shift_slider_win)
         self.qtgui_time_sink_x_0_0_0_0 = qtgui.time_sink_f(
-        	1024, #size
+        	10, #size
         	samp_rate, #samp_rate
         	"", #name
         	1 #number of inputs
         )
         self.qtgui_time_sink_x_0_0_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0_0_0.set_y_axis(-1, 1)
+        self.qtgui_time_sink_x_0_0_0_0.set_y_axis(-180, 180)
 
         self.qtgui_time_sink_x_0_0_0_0.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_0_0_0_0.enable_tags(-1, True)
         self.qtgui_time_sink_x_0_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0_0_0_0.enable_autoscale(True)
+        self.qtgui_time_sink_x_0_0_0_0.enable_autoscale(False)
         self.qtgui_time_sink_x_0_0_0_0.enable_grid(False)
         self.qtgui_time_sink_x_0_0_0_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0_0_0_0.enable_control_panel(True)
@@ -175,7 +175,7 @@ class rdf_sim(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
-        self.epy_block_0_0 = epy_block_0_0.blk(example_param=2.0)
+        self.epy_block_0_0 = epy_block_0_0.blk(samp_rate=samp_rate)
         self.blocks_throttle_0_0 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_threshold_ff_1 = blocks.threshold_ff(0, 0, 0)
@@ -222,6 +222,7 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.qtgui_time_sink_x_0_0_0_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
+        self.epy_block_0_0.samp_rate = self.samp_rate
         self.blocks_throttle_0_0.set_sample_rate(self.samp_rate)
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.analog_sig_source_x_1.set_sampling_freq(self.samp_rate)
