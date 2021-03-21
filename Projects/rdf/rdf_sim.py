@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: RDF Simulator
-# Generated: Mon Mar  8 22:16:40 2021
+# Generated: Sun Mar 21 16:26:05 2021
 ##################################################
 
 from distutils.version import StrictVersion
@@ -29,6 +29,7 @@ from gnuradio.eng_option import eng_option
 from gnuradio.filter import firdes
 from gnuradio.qtgui import Range, RangeWidget
 from optparse import OptionParser
+import epy_block_0
 import epy_block_0_0
 import math
 import sip
@@ -69,8 +70,9 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.variable_qtgui_label_0 = variable_qtgui_label_0 = 3
         self.shift_slider = shift_slider = 0
-        self.samp_rate = samp_rate = 5000
+        self.samp_rate = samp_rate = 48000
         self.freq = freq = 500
 
         ##################################################
@@ -79,54 +81,17 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         self._shift_slider_range = Range(0, 2* math.pi, 0.1, 0, 200)
         self._shift_slider_win = RangeWidget(self._shift_slider_range, self.set_shift_slider, "shift_slider", "slider", float)
         self.top_layout.addWidget(self._shift_slider_win)
-        self.qtgui_time_sink_x_0_0_0_0 = qtgui.time_sink_f(
-        	10, #size
-        	samp_rate, #samp_rate
-        	"", #name
-        	1 #number of inputs
-        )
-        self.qtgui_time_sink_x_0_0_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0_0_0.set_y_axis(-180, 180)
+        self._variable_qtgui_label_0_tool_bar = Qt.QToolBar(self)
 
-        self.qtgui_time_sink_x_0_0_0_0.set_y_label('Amplitude', "")
+        if None:
+          self._variable_qtgui_label_0_formatter = None
+        else:
+          self._variable_qtgui_label_0_formatter = lambda x: str(x)
 
-        self.qtgui_time_sink_x_0_0_0_0.enable_tags(-1, True)
-        self.qtgui_time_sink_x_0_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0_0_0_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_0_0_0_0.enable_grid(False)
-        self.qtgui_time_sink_x_0_0_0_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0_0_0_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_0_0_0_0.enable_stem_plot(False)
-
-        if not True:
-          self.qtgui_time_sink_x_0_0_0_0.disable_legend()
-
-        labels = ['Gate', 'Clock', '', '', '',
-                  '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-                  1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-                  "magenta", "yellow", "dark red", "dark green", "blue"]
-        styles = [1, 4, 1, 1, 1,
-                  1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-                   -1, -1, -1, -1, -1]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in xrange(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_0_0_0_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_0_0_0_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0_0_0_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0_0_0_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0_0_0_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0_0_0_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0_0_0_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_0_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0_0.pyqwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_0_0_win)
+        self._variable_qtgui_label_0_tool_bar.addWidget(Qt.QLabel('hello'+": "))
+        self._variable_qtgui_label_0_label = Qt.QLabel(str(self._variable_qtgui_label_0_formatter(self.variable_qtgui_label_0)))
+        self._variable_qtgui_label_0_tool_bar.addWidget(self._variable_qtgui_label_0_label)
+        self.top_layout.addWidget(self._variable_qtgui_label_0_tool_bar)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
         	1024, #size
         	samp_rate, #samp_rate
@@ -149,13 +114,13 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         if not True:
           self.qtgui_time_sink_x_0_0.disable_legend()
 
-        labels = ['FM Audio', 'Clock', 'Zero Crossing', '', '',
+        labels = ['FM Audio', 'Threshold', 'Clock', '', '',
                   '', '', '', '', '']
         widths = [1, 1, 1, 1, 1,
                   1, 1, 1, 1, 1]
         colors = ["blue", "red", "green", "black", "cyan",
                   "magenta", "yellow", "dark red", "dark green", "blue"]
-        styles = [1, 4, 1, 1, 1,
+        styles = [1, 1, 1, 1, 1,
                   1, 1, 1, 1, 1]
         markers = [-1, -1, -1, -1, -1,
                    -1, -1, -1, -1, -1]
@@ -175,14 +140,51 @@ class rdf_sim(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
-        self.epy_block_0_0 = epy_block_0_0.blk(samp_rate=samp_rate)
+        self.qtgui_number_sink_0 = qtgui.number_sink(
+            gr.sizeof_float,
+            0,
+            qtgui.NUM_GRAPH_HORIZ,
+            1
+        )
+        self.qtgui_number_sink_0.set_update_time(0.10)
+        self.qtgui_number_sink_0.set_title("Bearing")
+
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        units = ['', '', '', '', '',
+                 '', '', '', '', '']
+        colors = [("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"),
+                  ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black")]
+        factor = [1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1]
+        for i in xrange(1):
+            self.qtgui_number_sink_0.set_min(i, 0)
+            self.qtgui_number_sink_0.set_max(i, 360)
+            self.qtgui_number_sink_0.set_color(i, colors[i][0], colors[i][1])
+            if len(labels[i]) == 0:
+                self.qtgui_number_sink_0.set_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_number_sink_0.set_label(i, labels[i])
+            self.qtgui_number_sink_0.set_unit(i, units[i])
+            self.qtgui_number_sink_0.set_factor(i, factor[i])
+
+        self.qtgui_number_sink_0.enable_autoscale(False)
+        self._qtgui_number_sink_0_win = sip.wrapinstance(self.qtgui_number_sink_0.pyqwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_number_sink_0_win)
+        self.epy_block_0_0 = epy_block_0_0.blk(samp_rate=samp_rate, freq=500)
+        self.epy_block_0 = epy_block_0.blk(example_param=1.0)
+        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_char*1, 'localhost', 913, 1472, True)
         self.blocks_throttle_0_0 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_threshold_ff_1 = blocks.threshold_ff(0, 0, 0)
+        self.blocks_null_source_0 = blocks.null_source(gr.sizeof_gr_complex*1)
+        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vcc((complex(math.cos(shift_slider),math.sin(shift_slider)), ))
+        self.blocks_float_to_uchar_0_0_0 = blocks.float_to_uchar()
         self.blocks_float_to_uchar_0_0 = blocks.float_to_uchar()
         self.blocks_float_to_uchar_0 = blocks.float_to_uchar()
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
+        self.blocks_add_xx_0 = blocks.add_vff(1)
         self.analog_sig_source_x_1 = analog.sig_source_f(samp_rate, analog.GR_SQR_WAVE, freq , 1, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, freq, 1, 0)
 
@@ -191,22 +193,35 @@ class rdf_sim(gr.top_block, Qt.QWidget):
         ##################################################
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_throttle_0, 0))
         self.connect((self.analog_sig_source_x_1, 0), (self.blocks_throttle_0_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.blocks_float_to_uchar_0_0_0, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.blocks_threshold_ff_1, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.blocks_float_to_uchar_0, 0), (self.epy_block_0_0, 0))
         self.connect((self.blocks_float_to_uchar_0_0, 0), (self.epy_block_0_0, 1))
+        self.connect((self.blocks_float_to_uchar_0_0_0, 0), (self.blocks_udp_sink_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_complex_to_float_0, 0))
+        self.connect((self.blocks_null_source_0, 0), (self.epy_block_0, 0))
+        self.connect((self.blocks_threshold_ff_1, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_threshold_ff_1, 0), (self.blocks_float_to_uchar_0, 0))
         self.connect((self.blocks_threshold_ff_1, 0), (self.qtgui_time_sink_x_0_0, 1))
         self.connect((self.blocks_throttle_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_throttle_0_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_throttle_0_0, 0), (self.blocks_float_to_uchar_0_0, 0))
         self.connect((self.blocks_throttle_0_0, 0), (self.qtgui_time_sink_x_0_0, 2))
-        self.connect((self.epy_block_0_0, 0), (self.qtgui_time_sink_x_0_0_0_0, 0))
+        self.connect((self.epy_block_0, 0), (self.blocks_null_sink_0, 0))
+        self.connect((self.epy_block_0_0, 0), (self.qtgui_number_sink_0, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "rdf_sim")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
+
+    def get_variable_qtgui_label_0(self):
+        return self.variable_qtgui_label_0
+
+    def set_variable_qtgui_label_0(self, variable_qtgui_label_0):
+        self.variable_qtgui_label_0 = variable_qtgui_label_0
+        Qt.QMetaObject.invokeMethod(self._variable_qtgui_label_0_label, "setText", Qt.Q_ARG("QString", self.variable_qtgui_label_0))
 
     def get_shift_slider(self):
         return self.shift_slider
@@ -220,7 +235,6 @@ class rdf_sim(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.qtgui_time_sink_x_0_0_0_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
         self.epy_block_0_0.samp_rate = self.samp_rate
         self.blocks_throttle_0_0.set_sample_rate(self.samp_rate)
