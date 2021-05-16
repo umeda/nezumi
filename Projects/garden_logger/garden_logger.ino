@@ -60,6 +60,9 @@
 const int chipSelect = 10;
 int sensorPin = A0;    // input pin for voltage divider
 int sensorValue = 0;  // variable to store the value coming from the sensor
+int sm1 = A1;
+int sm2 = A2;
+int sm3 = A3;
 float rm = 0.0;
 int sampleMillis = 30000;
 char buffer[20]; // datetime string
@@ -69,7 +72,7 @@ OneWire  ds1(3);  // on pin 3 (a 4.7K resistor is necessary)
 OneWire  ds2(4);  // on pin 4 (a 4.7K resistor is necessary)
 OneWire  ds3(5);  // on pin 5 (a 4.7K resistor is necessary)
 
-String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3";
+String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3, sm_1, sm_2, sm_3";
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -112,6 +115,8 @@ void setup() {
 
 void loop() {
   // make a string for assembling the data to log:
+//  Serial.println("top of the loop");
+//  Serial.flush();
   String dataString = "";
 
   DateTime now = rtc.now();
@@ -127,7 +132,9 @@ void loop() {
   float t1 = getTemp(ds1);
   float t2 = getTemp(ds2);
   float t3 = getTemp(ds3);
-
+  float m1 = analogRead(sm1);
+  float m2 = analogRead(sm2);
+  float m3 = analogRead(sm3);
   
   
   dataString += String(rm);
@@ -141,10 +148,17 @@ void loop() {
   dataString += String(t2);
   dataString += ", ";
   dataString += String(t3);
+  dataString += ", ";
+  dataString += String(m1);
+  dataString += ", ";
+  dataString += String(m2);
+  dataString += ", ";
+  dataString += String(m3);
 
-  saveData(dataString);
+  saveData(dataString); 
   sendData("data, " + measurands, dataString);
-  
+
+//  delay(5000);
   delay(sampleMillis);
   delay(sampleMillis);
 }
@@ -155,14 +169,14 @@ void loop() {
 #################################################################
 */
 
-void saveData(String data){
+void saveData(String monitordata){
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   File dataFile = SD.open("garden.csv", FILE_WRITE);
 
   // if the file is available, write to it:
   if (dataFile) {
-    dataFile.println(data);
+    dataFile.println(monitordata);
     dataFile.close();
   }
   // if the file isn't open, pop up an error:
@@ -172,9 +186,12 @@ void saveData(String data){
     }
    }
 
-void sendData(String message, String data){
-    // print to the serial port:
-    Serial.println(message + ", " + data);
+void sendData(String message, String monitordata){
+    // print to the serial port
+    Serial.print(message);
+    Serial.print(", ");
+    Serial.print(monitordata);
+    Serial.println("");
     Serial.flush();
     }
 
