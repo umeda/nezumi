@@ -1,5 +1,5 @@
 /*
-  garden datalogger v0.3
+  garden datalogger v0.4
 
   This sketch logs one measurement per minute to an SD Card.
 
@@ -29,10 +29,15 @@
      MISO - pin 12
      CLK - pin 13
      CS - pin 10 (for HiLetGo data logger)
-     
+
+  Soil moisture sensors are connected to analog read pins A1, A2, and A3
+  Soil moisture% = -0.42 * Ax + 442
+  
    Some code snippets from Adafruit Industries.
    Other code snipppets from http://www.pjrc.com/teensy/td_libs_OneWire.html
    Copyright 2020 Nezumi Workbench
+
+   This is free software. Attribution is appreciated.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -71,8 +76,8 @@ DHT dht(DHTPIN, DHTTYPE);
 OneWire  ds1(3);  // on pin 3 (a 4.7K resistor is necessary)
 OneWire  ds2(4);  // on pin 4 (a 4.7K resistor is necessary)
 OneWire  ds3(5);  // on pin 5 (a 4.7K resistor is necessary)
-
-String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3, sm_1, sm_2, sm_3";
+int long pulse_count = 0;
+String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3, sm_1, sm_2, sm_3, flow";
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -80,7 +85,6 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-
 
   if (! rtc.begin()) {
     // Serial.println("Couldn't find RTC");
@@ -98,6 +102,10 @@ void setup() {
     sendData("msg", "Card failed or not present.");
     // don't do anything more:
     while (1);
+
+  // set up interrupt to increment counter when tick on water wheel occurs
+  attachInterrupt(3,water_wheel,FALLING);
+  
   }
   // Serial.println("card initialized.");
   sendData("msg", "Card initialized.");
@@ -136,7 +144,6 @@ void loop() {
   float m2 = analogRead(sm2);
   float m3 = analogRead(sm3);
   
-  
   dataString += String(rm);
   dataString += ", ";
   dataString += String(t);
@@ -154,6 +161,8 @@ void loop() {
   dataString += String(m2);
   dataString += ", ";
   dataString += String(m3);
+  dataString += ", ";
+  dataString += String(pulse_count);
 
   saveData(dataString); 
   sendData("data, " + measurands, dataString);
@@ -292,4 +301,9 @@ float getTemp(OneWire ds) {
   //Serial.print(fahrenheit);
   //Serial.println(" Fahrenheit");
   return(celsius);
+}
+
+void water_wheel() {
+  // increment counter when water wheel clicks.
+  pulse_count++;  
 }
