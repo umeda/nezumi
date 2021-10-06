@@ -1,5 +1,7 @@
+argparse==1.4.0
 astroid==2.3.3
 cycler==0.10.0
+engineering_notation
 isort==4.3.21
 kiwisolver==1.2.0
 lazy-object-proxy==1.4.3
