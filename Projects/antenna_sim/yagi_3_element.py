@@ -11,10 +11,15 @@ from antenna_util import *
 from context_clean import *
 import math
 from engineering_notation import EngNumber
+from pprint import pprint
+from json import loads
 
-def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 0.96] ):
+def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96] ):
 
     #TODO: really need to have account for the center element in element_factor
+
+    print(type(element_spacing))
+    pprint(element_spacing)
 
     # creation of a nec context
     context=nec_context()
@@ -58,7 +63,7 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 0.96]
     geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
     #director
-    dir_len = drv_len * element_factor[1]
+    dir_len = drv_len * element_factor[2]
     pos = dir_len * 2 * element_spacing[1]
     element_tag = 3
     center      = np.array([pos, 0, 0])
@@ -170,7 +175,10 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 0.96]
     ax.plot(np.roll(thetas, 23) , gains[:,0], color='r', linewidth=3)
     ax.grid(True)
 
-    ax.set_title("3 element NBS yagi - side view", va='bottom')
+    fwd_gain = gains[:,0][0]
+    pprint(f'Forward Gain = {fwd_gain}')
+
+    ax.set_title("3 element yagi - side view", va='bottom')
     plt.savefig("radiation_pattern_%i_MHz.png" % freq)
     # plt.show()
 
@@ -205,15 +213,17 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 0.96]
     print("Saving plot to file: %s" % filename)
     plt.savefig(filename)
     # plt.show()
-    # return best swr & freq & FB ratio
+    # return best swr & freq & fwd gain
     # 
      
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
     parser.add_argument('--freq', default=146.52, help='Driven element resonant frequency in MHz')
-    parser.add_argument('--elespacing', default=[0.25, 0.25], help='Element Spacing from back to front in wavelengths')
-    parser.add_argument('--elefactor', default=[1.04, 1.00, 0.96], help='Element length factor from back to front')    
+    parser.add_argument('--elespacing', default="[0.25,0.25]", help='Element Spacing from back to front in wavelengths')
+    parser.add_argument('--elefactor', default="[1.04,1.00,0.96]", help='Element length factor from back to front')    
     args = parser.parse_args()
-    yagi3(float(args.freq))
+    yagi3(freq=float(args.freq), 
+          element_spacing=loads(args.elespacing),
+          element_factor=loads(args.elefactor))
 
 
