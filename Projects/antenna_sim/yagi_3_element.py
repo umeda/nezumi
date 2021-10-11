@@ -14,12 +14,12 @@ from engineering_notation import EngNumber
 from pprint import pprint
 from json import loads
 
-def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96] ):
+def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96], show_plots=False ):
 
     #TODO: really need to have account for the center element in element_factor
 
-    print(type(element_spacing))
-    pprint(element_spacing)
+    # print(type(element_spacing))
+    # pprint(element_spaci ng)
 
     # creation of a nec context
     context=nec_context()
@@ -36,7 +36,7 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     wire_rad = wire_diameter_mm / 2000 
     length_ft = 468.0 / freq # dipole formula from ARRL
     drv_len = length_ft * 12 * 25.4 / 1000  #  driven element length in meters.
-    print(drv_len)
+    # print(drv_len)
     num_segs = 35 # Number of segments per Element. More segments = increased accuracy and longer processing time.
     excitation_element_num = 1 #  Element to which excitation is applied.
 
@@ -84,7 +84,7 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
 
     #add a "ex" card to specify an excitation
     center_seg = int((num_segs + 1) / 2) + 1
-    print(f'Center Segment = {center_seg} of {num_segs}')
+    # print(f'Center Segment = {center_seg} of {num_segs}')
     context.ex_card(0, excitation_element_num, center_seg, 0, 0, 0, 0, 0, 0, 0, 0)
 
     #add a "fr" card to specify the frequency 
@@ -166,21 +166,23 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     thetas = rp.get_theta_angles() * 3.1415 / 180.0
     phis = rp.get_phi_angles() * 3.1415 / 180.0
 
-
-    # Plot stuff
-    import matplotlib.pyplot as plt
-
-    ax = plt.subplot(111, polar=True)
-    # TODO: np.roll hack needed to make antenna face the right way. Need to figure out why. 
-    ax.plot(np.roll(thetas, 23) , gains[:,0], color='r', linewidth=3)
-    ax.grid(True)
-
     fwd_gain = gains[:,0][0]
-    pprint(f'Forward Gain = {fwd_gain}')
 
-    ax.set_title("3 element yagi - side view", va='bottom')
-    plt.savefig("radiation_pattern_%i_MHz.png" % freq)
-    # plt.show()
+    if show_plots:
+        # Plot stuff
+        # import matplotlib.pyplot as plt
+        
+        ax = plt.subplot(111, polar=True)
+        # TODO: np.roll hack needed to make antenna face the right way. Need to figure out why. 
+        ax.plot(np.roll(thetas, 23) , gains[:,0], color='r', linewidth=3)
+        ax.grid(True)
+
+        # pprint(f'Forward Gain = {fwd_gain}')
+
+        # ax.set_title("3 element yagi - side view", va='bottom')
+        ax.set_title(f'3 Element Yagi Radiation Pattern: Side View\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Factor = {element_factor[0]}, Director Factor = {element_factor[2]}')
+        plt.savefig("radiation_pattern_%i_MHz.png" % freq)
+        plt.show()
 
     system_impedance = 50  
     start_freq = 140
@@ -201,29 +203,32 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
         freqs.append(ipt.get_frequency() / 1000000)
         vswrs.append(vswr(z, system_impedance))
             
-        print(f"freq = {EngNumber(ipt.get_frequency(), precision=1)}, SWR = {EngNumber(vswr(z, system_impedance), precision=2)}, z = {EngNumber(system_impedance)}")
-
-    plt.figure()
-    plt.plot(freqs, vswrs)
-    plt.title("VSWR of a 3 element dipole for a %i Ohm system" % (system_impedance))
-    plt.xlabel("Frequency (MHz)")
-    plt.ylabel("VSWR")
-    plt.grid(True)
-    filename = "vswr_%i_MHz.png" % freq
-    print("Saving plot to file: %s" % filename)
-    plt.savefig(filename)
-    # plt.show()
-    # return best swr & freq & fwd gain
-    # 
+        # print(f"freq = {EngNumber(ipt.get_frequency(), precision=1)}, SWR = {EngNumber(vswr(z, system_impedance), precision=2)}, z = {EngNumber(system_impedance)}")
+    
+    if show_plots:
+        plt.figure()
+        plt.plot(freqs, vswrs)
+        plt.title(f'VSWR of a 3 element yagi for a {system_impedance} Ohm system\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Factor = {element_factor[0]}, Director Factor = {element_factor[2]}')
+        plt.xlabel("Frequency (MHz)")
+        plt.ylabel("VSWR")
+        plt.grid(True)
+        filename = "vswr_%i_MHz.png" % freq
+        print("Saving plot to file: %s" % filename)
+        plt.savefig(filename)
+        plt.show()
+        # return best swr & freq & fwd gain
+        # 
+    return fwd_gain
      
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
-    parser.add_argument('--freq', default=146.52, help='Driven element resonant frequency in MHz')
-    parser.add_argument('--elespacing', default="[0.25,0.25]", help='Element Spacing from back to front in wavelengths')
+    parser.add_argument('--freq', default=148.52, help='Driven element resonant frequency in MHz')
+    parser.add_argument('--elespacing', default="[0.250,0.250]", help='Element Spacing from back to front in wavelengths')
     parser.add_argument('--elefactor', default="[1.04,1.00,0.96]", help='Element length factor from back to front')    
     args = parser.parse_args()
-    yagi3(freq=float(args.freq), 
+    fwd_gain = yagi3(freq=float(args.freq), 
           element_spacing=loads(args.elespacing),
-          element_factor=loads(args.elefactor))
-
+          element_factor=loads(args.elefactor),
+          show_plots=True)
+    print(f'Forward Gain = {fwd_gain}')
 
