@@ -24,24 +24,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # loop here!
-    spaces = []
+    lens = []
     fwd_gains = []
 
-    spacing = loads(args.elespacing)
-    for space_factor in range(50, 150, 5):
-        space_list = [x * space_factor / 100 for x in spacing] # ugh - a list comprenension
-        pprint(space_list)
+    lengths = loads(args.elefactor)
+    for len_factor in range(0, 50, 2):
+        len_list = [1.0 + len_factor / 1000, 1.0,  1.0 - len_factor / 1000]
+        pprint(len_list)
         perf_params = yagi3(freq=float(args.freq), 
-                         element_spacing=space_list,
-                         element_factor=loads(args.elefactor))
+                         element_spacing=loads(args.elespacing),
+                         element_factor=len_list)
         print(perf_params['fwd_gain'])
-        spaces.append(space_list[0])
+        lens.append(len_list[0] - 1)
         fwd_gains.append(perf_params['fwd_gain'])
     print('space   fwd gain')
-    for i in range(0, len(spaces)):
-          print(f'{spaces[i]}    {EngNumber(fwd_gains[i])}')
-    plt.plot(spaces, fwd_gains, 'b.')
-    plt.xlabel("Element Spacing (wavelengths)")
+    for i in range(0, len(lens)):
+          print(f'{lens[i]}    {EngNumber(fwd_gains[i])}')
+    plt.plot(lens, fwd_gains, 'b.')
+    plt.xlabel("Element Length Adjustment (fraction)")
     plt.ylabel("Antenna Gain")
     plt.title('3 Element Yagi Simulation')
     plt.show()

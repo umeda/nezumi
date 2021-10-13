@@ -218,7 +218,24 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
         plt.show()
         # return best swr & freq & fwd gain
         # 
-    return fwd_gain
+    min_swr_freq = 0.0
+    max_swr_freq = 0.0
+    min_vswr = 999999999.0
+    # for idx, vswr in vswrs:
+    #     if vswr < 2.0:
+    #         max_swr_freq = freqs(idx)
+    #     if vswr < min_vswr:
+    #         min_vswr = vswr
+    # for idx, vswr in vswrs.reverse():
+    #     if vswr < 2.0:
+    #         min_swr_freq = freqs(idx)
+
+    perf_params = {'fwd_gain': fwd_gain,
+                   'min_swr_freq': min_swr_freq,
+                   'max_swr_freq': max_swr_freq,
+                   'min_swr': min_vswr}
+    return perf_params
+    #return fwd_gain
      
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
