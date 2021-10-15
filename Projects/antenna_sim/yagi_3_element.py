@@ -1,3 +1,24 @@
+'''
+Copyright 2021 Nezumi Workbench
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+'''
 
 import numpy as np
 import scipy.optimize
@@ -221,14 +242,14 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     min_swr_freq = 0.0
     max_swr_freq = 0.0
     min_vswr = 999999999.0
-    # for idx, vswr in vswrs:
-    #     if vswr < 2.0:
-    #         max_swr_freq = freqs(idx)
-    #     if vswr < min_vswr:
-    #         min_vswr = vswr
-    # for idx, vswr in vswrs.reverse():
-    #     if vswr < 2.0:
-    #         min_swr_freq = freqs(idx)
+    for idx, swr in enumerate(vswrs):  # must be enumerated if we want the index.
+        if swr < 2.0:
+            max_swr_freq = freqs[idx]
+        if swr < min_vswr:
+            min_vswr = swr
+    for idx, swr in enumerate(vswrs[::-1]):  # what a strange way to reverse a list!
+        if swr < 2.0:
+            min_swr_freq = freqs[idx]
 
     perf_params = {'fwd_gain': fwd_gain,
                    'min_swr_freq': min_swr_freq,
