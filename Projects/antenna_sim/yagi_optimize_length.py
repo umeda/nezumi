@@ -80,16 +80,6 @@ if __name__ == '__main__':
             min_vswrs_data['x'].append(len_list[0] - 1)
             min_vswrs_data['swrs'].append(perf_params['min_swr'])
  
-    # print('space   fwd gain')
-    # for i in range(0, len(lens)):
-    #       print(f'{lens[i]}    {EngNumber(fwd_gains[i])}')
-    # plt.plot(lens, fwd_gains, 'b.')
-    # plt.xlabel("Element Length Adjustment (fraction)")
-    # plt.ylabel("Antenna Gain")
-    # plt.title('3 Element Yagi Simulation')
-    # plt.show()
-    # print('pau')
-
     fig, ax = plt.subplots()
     ax.plot(lens, fwd_gains, 'b.')
     ax.set_title("3 Element Yagi Simulation")
@@ -99,53 +89,57 @@ if __name__ == '__main__':
     ax2 = ax.twinx()
     ax2.plot(min_vswrs_data['x'], min_vswrs_data['swrs'], 'g.')
     ax2.set_ylabel('Lowest SWR')
-    ax2.hlines(2.0, 0, min_vswrs_data['x'][-1],colors='green', linestyles='dashed', label='Max SWR')
+    ax2.hlines(2.0, 0, min_vswrs_data['x'][-1],colors='green', linestyles='dashed')
     ax2.text(0, 2, '   max SWR', ha='left', va='bottom')
     ax2.tick_params(axis='y', labelcolor='green')
     plt.show()
 
-    # plt.plot(min_vswrs_data['x'], min_vswrs_data['swrs'], 'b.')
-    # plt.xlabel("Element Length Adjustment (fraction)")
-    # plt.ylabel("Min SWR")
-    # plt.title('3 Element Yagi Simulation')
-    # plt.show()
-    # print('pau')
-    # plt.plot(lens, fwd_gains, 'b.')
-    # plt.xlabel("Element Length Adjustment (fraction)")
-    # plt.ylabel("Acceptable SWR Frequency Range")
-    # plt.title('3 Element Yagi Simulation')
-    # plt.show()
-    # print('pau')
+    fig, ax = plt.subplots()
+    ax.plot(lens, fwd_gains, 'b.')
+    ax.set_title("3 Element Yagi Simulation")
+    ax.set_xlabel("Element Length Adjustment (fraction)")
+    ax.set_ylabel("Antenna Gain")
+    ax.tick_params(axis='y', labelcolor='blue')
+    ax2 = ax.twinx()
+    ax2.plot(min_freqs_data['x'], min_freqs_data['freqs'], 'r.')
+    ax2.plot(max_freqs_data['x'], max_freqs_data['freqs'], 'r.')
+    ax2.set_ylabel('Frequency with SWR < 2 (MHz)')
+    ax2.hlines([144,148], 0, min_vswrs_data['x'][-1],colors='red', linestyles='dashed')
+    ax2.text(0, 144, '   lower band edge', ha='left', va='bottom')
+    ax2.text(0, 148, '   upper band edge', ha='left', va='top')
+    ax2.tick_params(axis='y', labelcolor='red')
+    plt.show()
+    print('pau')
 
 
 
 
 
-    spaces_back = []
-    spaces_front = []
-    fwd_gains = []
-    max_fwd_gain = 0
-    max_back = 0
-    max_front = 0
-    for space_factor_back in range(2, 200, 20):
-        two_d_spaces = []
-        two_d_fwd_gains = []
-        for space_factor_front in range(2, 200, 20):
-            space_list = [spacing[0] * space_factor_back / 100, spacing[1] * space_factor_front /100] # ugh - a list comprenension
-            pprint(space_list)
-            perf_params = yagi3(freq=float(args.freq), 
-                             element_spacing=space_list,
-                             element_factor=loads(args.elefactor))
-            print(perf_params['fwd_gain'])
-            spaces_back.append(space_list[0])
-            spaces_front.append(space_list[1])
-            fwd_gains.append(perf_params['fwd_gain'])
-            two_d_spaces.append(space_list[1])
-            two_d_fwd_gains.append(perf_params['fwd_gain'])
-            if max_fwd_gain < perf_params['fwd_gain']:
-                max_fwd_gain = perf_params['fwd_gain']
-                max_back = space_list[0]
-                max_front = space_list[1]
+    # spaces_back = []
+    # spaces_front = []
+    # fwd_gains = []
+    # max_fwd_gain = 0
+    # max_back = 0
+    # max_front = 0
+    # for space_factor_back in range(2, 200, 20):
+    #     two_d_spaces = []
+    #     two_d_fwd_gains = []
+    #     for space_factor_front in range(2, 200, 20):
+    #         space_list = [spacing[0] * space_factor_back / 100, spacing[1] * space_factor_front /100] # ugh - a list comprenension
+    #         pprint(space_list)
+    #         perf_params = yagi3(freq=float(args.freq), 
+    #                          element_spacing=space_list,
+    #                          element_factor=loads(args.elefactor))
+    #         print(perf_params['fwd_gain'])
+    #         spaces_back.append(space_list[0])
+    #         spaces_front.append(space_list[1])
+    #         fwd_gains.append(perf_params['fwd_gain'])
+    #         two_d_spaces.append(space_list[1])
+    #         two_d_fwd_gains.append(perf_params['fwd_gain'])
+    #         if max_fwd_gain < perf_params['fwd_gain']:
+    #             max_fwd_gain = perf_params['fwd_gain']
+    #             max_back = space_list[0]
+    #             max_front = space_list[1]
         # plt.plot(two_d_spaces, two_d_fwd_gains, 'b.')
         # plt.xlabel("Element Spacing (wavelengths)")
         # plt.ylabel("Antenna Gain")
@@ -156,34 +150,34 @@ if __name__ == '__main__':
         
 
         
-    print(f'maximium gain of {max_fwd_gain} at {max_back} and {max_front}')
+    # print(f'maximium gain of {max_fwd_gain} at {max_back} and {max_front}')
 
-    from matplotlib import cm
-    from matplotlib.ticker import LinearLocator
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    # Plot the surface.
+    # from matplotlib import cm
+    # from matplotlib.ticker import LinearLocator
+    # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    # # Plot the surface.
     
-    surf = ax.plot_trisurf(spaces_back, spaces_front, np.array(fwd_gains), cmap=cm.coolwarm,
-                        linewidth=0, antialiased=False)
-    ax.set_title('Effects of Element Spacing on Yagi Performance')
-    ax.set_xlabel('Reflector Spacing')
-    ax.set_ylabel('Director Spacing')
-    ax.set_zlabel('Gain')
-    # Customize the z axis.
-    # ax.set_zlim(-1.01, 1.01)
-    # ax.zaxis.set_major_locator(LinearLocator(10))
-    # A StrMethodFormatter is used automatically
-    # ax.zaxis.set_major_formatter('{x:.02f}')
+    # surf = ax.plot_trisurf(spaces_back, spaces_front, np.array(fwd_gains), cmap=cm.coolwarm,
+    #                     linewidth=0, antialiased=False)
+    # ax.set_title('Effects of Element Spacing on Yagi Performance')
+    # ax.set_xlabel('Reflector Spacing')
+    # ax.set_ylabel('Director Spacing')
+    # ax.set_zlabel('Gain')
+    # # Customize the z axis.
+    # # ax.set_zlim(-1.01, 1.01)
+    # # ax.zaxis.set_major_locator(LinearLocator(10))
+    # # A StrMethodFormatter is used automatically
+    # # ax.zaxis.set_major_formatter('{x:.02f}')
 
-    # Add a color bar which maps values to colors.
-    # fig.colorbar(surf, shrink=0.5, aspect=5)
-    # rotate the axes and update
-    for angle in range(0, 360):
-        ax.view_init(30, angle)
-        plt.draw()
-        plt.pause(.001)
+    # # Add a color bar which maps values to colors.
+    # # fig.colorbar(surf, shrink=0.5, aspect=5)
+    # # rotate the axes and update
+    # for angle in range(0, 360):
+    #     ax.view_init(30, angle)
+    #     plt.draw()
+    #     plt.pause(.001)
 
 
-    plt.show()
+    # plt.show()
 
-    print('pau')
+    # print('pau')
