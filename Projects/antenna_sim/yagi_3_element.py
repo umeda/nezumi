@@ -249,7 +249,7 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
             min_vswr = swr
     for idx, swr in enumerate(vswrs[::-1]):  # what a strange way to reverse a list!
         if swr < 2.0:
-            min_swr_freq = freqs[idx]
+            min_swr_freq = freqs[len(freqs) - idx - 1] # look out for off by 1 error!
 
     perf_params = {'fwd_gain': fwd_gain,
                    'min_swr_freq': min_swr_freq,
