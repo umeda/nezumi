@@ -1,6 +1,24 @@
 '''
 Copyright 2021 Nezumi Workbench
 
+This library function returns performance paramters for a 3 element yagi,
+given certain design parameters.
+
+    Design Parameters:
+        
+        Frequency
+        Element Spacing
+        Element Length
+
+    Performance Parameters:
+    
+        Gain
+        Best SWR
+        Min and Max Frequencies for SWR < 2
+        Radiation Pattern
+        SWR Over Frequncy
+
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights 
@@ -36,8 +54,6 @@ from pprint import pprint
 from json import loads
 
 def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96], show_plots=False ):
-
-    #TODO: really need to have account for the center element in element_factor
 
     # print(type(element_spacing))
     # pprint(element_spaci ng)
