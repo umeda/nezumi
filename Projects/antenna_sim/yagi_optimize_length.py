@@ -40,7 +40,7 @@ import matplotlib.collections as collections
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
-    parser.add_argument('--freq', default=147.50, help='Driven element resonant frequency in MHz')
+    parser.add_argument('--freq', default=146.52, help='Driven element resonant frequency in MHz')
     parser.add_argument('--elespacing', default="[0.25,0.25]", help='Element Spacing from back to front in wavelengths')
     parser.add_argument('--elefactor', default="[1.04,1.00,0.96]", help='Element length factor from back to front')    
     args = parser.parse_args()
@@ -63,31 +63,36 @@ if __name__ == '__main__':
 
     lengths = loads(args.elefactor)
     for len_factor in range(0, 100, 1):  # was 4
+        ref_len = 0.985
+        drv_ele_lam = str(EngNumber(0.25 * ref_len))
         # Reflector is half a wavelength.
-        reflector_len = 1.0
-        len_list = [reflector_len,  
-                    reflector_len * (1.0 - len_factor / 1000), 
-                    reflector_len * (1.0 - len_factor / 1000) ** 2]
+        # len_list = [reflector_len,  
+        #             reflector_len * (1.0 - len_factor / 1000), 
+        #             reflector_len * (1.0 - len_factor / 1000) ** 2]
+        # Driven element is half a wavelength.
+        len_list = [ref_len * (1.0 + len_factor / 1000),  
+                    ref_len, 
+                    ref_len * (1.0 - len_factor / 1000)]
         pprint(len_list)
         perf_params = yagi3(freq=float(args.freq), 
                          element_spacing=loads(args.elespacing),
                          element_factor=len_list, show_plots=False)
         pprint(perf_params)
-        lens.append(1 - len_list[1])
+        lens.append(len_factor / 1000)
         fwd_gains.append(perf_params['fwd_gain'])
         if perf_params['min_swr_freq'] != 0.0:
-            min_freqs_data['x'].append(1 - len_list[1])
+            min_freqs_data['x'].append(len_factor / 1000)
             min_freqs_data['freqs'].append(perf_params['min_swr_freq'])
         if perf_params['max_swr_freq'] != 0.0:
-            max_freqs_data['x'].append(1 - len_list[1])
+            max_freqs_data['x'].append(len_factor / 1000)
             max_freqs_data['freqs'].append(perf_params['max_swr_freq'])
         if perf_params['min_swr'] != 999999999.0:
-            min_vswrs_data['x'].append(1 - len_list[1])
+            min_vswrs_data['x'].append(len_factor / 1000)
             min_vswrs_data['swrs'].append(perf_params['min_swr'])
  
     fig, ax = plt.subplots()
     ax.plot(lens, fwd_gains, 'b-')
-    ax.set_title("3 Element Yagi Simulation\ndesign freq = " + str(float(args.freq)) + " MHz, space factor = "   + str(loads(args.elespacing)[0]) )
+    ax.set_title(str(float(args.freq)) + " MHz, 3 Element Yagi Simulation\n space factor = "   + str(loads(args.elespacing)[0]) )
     ax.set_xlabel("Element Length Adjustment (fraction)")
     ax.set_ylabel("Antenna Gain")
     ax.tick_params(axis='y', labelcolor='blue')

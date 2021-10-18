@@ -55,6 +55,8 @@ from json import loads
 
 def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96], show_plots=False ):
 
+    #TODO: return element lengths in wavelengths.
+    
     # print(type(element_spacing))
     # pprint(element_spaci ng)
 
@@ -72,7 +74,8 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     # Derived Values
     wire_rad = wire_diameter_mm / 2000 
     length_ft = 468.0 / freq # dipole formula from ARRL
-    drv_len = length_ft * 12 * 25.4 / 1000  #  driven element length in meters.
+    halfwave = length_ft * 12 * 25.4 / 1000  #  driven element length in meters.
+    drv_len = halfwave * element_factor[1]
     # print(drv_len)
     num_segs = 35 # Number of segments per Element. More segments = increased accuracy and longer processing time.
     excitation_element_num = 1 #  Element to which excitation is applied.
@@ -89,8 +92,8 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
 
 
     #reflector
-    ref_len = drv_len * element_factor[0]
-    pos = -1 * ref_len * 2 * element_spacing[0]  # negative because it's behind the driven element
+    ref_len = halfwave * element_factor[0]
+    pos = -1 * halfwave * 2 * element_spacing[0]  # negative because it's behind the driven element
     element_tag = 2
     center      = np.array([pos, 0, 0]) # back
     half_height = np.array([0  , 0, ref_len/2.0])
@@ -100,8 +103,8 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
     #director
-    dir_len = drv_len * element_factor[2]
-    pos = dir_len * 2 * element_spacing[1]
+    dir_len = halfwave * element_factor[2]
+    pos = halfwave * 2 * element_spacing[1]
     element_tag = 3
     center      = np.array([pos, 0, 0])
     half_height = np.array([0  , 0, dir_len/2.0])
