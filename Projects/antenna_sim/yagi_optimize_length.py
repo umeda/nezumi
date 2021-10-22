@@ -92,7 +92,7 @@ if __name__ == '__main__':
  
     fig, ax = plt.subplots()
     ax.plot(lens, fwd_gains, 'b-')
-    ax.set_title(str(float(args.freq)) + " MHz, 3 Element Yagi Simulation\n space factor = "   + str(loads(args.elespacing)[0]) )
+    ax.set_title(str(float(args.freq)) + " MHz, 3 Element Yagi Simulation\n space factor = "   + str(loads(args.elespacing)[0]) + ", scale factor = "   + str(ref_len) )
     ax.set_xlabel("Element Length Adjustment (fraction)")
     ax.set_ylabel("Antenna Gain")
     ax.tick_params(axis='y', labelcolor='blue')
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots()
     ax.plot(lens, fwd_gains, 'b-')
-    ax.set_title("3 Element Yagi Simulation\ndesign freq = " + str(float(args.freq)) + " MHz, space factor = "   + str(loads(args.elespacing)[0]) )
+    ax.set_title(str(float(args.freq)) + " MHz, 3 Element Yagi Simulation\n space factor = "   + str(loads(args.elespacing)[0]) + ", scale factor = "   + str(ref_len) )
     ax.set_xlabel("Element Length Adjustment (fraction)")
     ax.set_ylabel("Antenna Gain")
     ax.tick_params(axis='y', labelcolor='blue')
