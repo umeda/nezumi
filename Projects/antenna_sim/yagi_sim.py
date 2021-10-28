@@ -60,13 +60,29 @@ from engineering_notation import EngNumber
 from pprint import pprint
 from json import loads
 
-def yagi3(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0.9560,0.9178], units='m', show_plots=False ):
+def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0.9560,0.9178], units='m', show_plots=False ):
 
-    #TODO: return element lengths in wavelengths.
+    #TODO: return element lengths in wavelengths or something like that.
     
-    # print(type(element_spacing))
-    # pprint(element_spaci ng)
+    # convert to meters
+    if units == 'mm':
+        element_spacing = [space / 1000 for space in element_spacing]
+        element_length = [element / 1000 for element in element_length]
+    elif units == 'feet':
+        element_spacing = [space * 12 * 25.4 / 1000 for space in element_spacing]
+        element_length = [element * 12 * 25.4 / 1000 for element in element_length]
+    elif units == 'in':
+        element_spacing = [space * 25.4 / 1000  for space in element_spacing]
+        element_length = [element * 25.4 / 1000 for element in element_length]
+    elif units == 'lambda':
+        element_spacing = [space * 300 / freq for space in element_spacing]
+        element_length = [element * 300 / freq for element in element_length]
 
+
+
+    # print(type(element_spacing))
+    pprint(element_spacing)
+    pprint(element_length)
     # creation of a nec context
     context=nec_context()
     # get the associated geometry
@@ -298,19 +314,19 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
     parser.add_argument('--freq', default=146.52, help='Driven element resonant frequency in MHz')
-    parser.add_argument('--elelength', default="[0.9943,0.9560,0.9178]", help='Element lengths from back to front')
-    parser.add_argument('--elespace', default="[0.4780,0.4780]", help='Element spacing from back to front')
+    parser.add_argument('--elelength', default="[0.9943,0.9560,0.9178]", help='Array of element lengths from back to front')
+    parser.add_argument('--elespace', default="[0.4780,0.4780]", help='Array of element spacing from back to front')
     parser.add_argument('--units', default='m', choices=['m', 'mm', 'ft', 'in', 'lambda'], help='Units in meters(m), millimeters(mm), feet(ft), inches(in), or wavelengths(lambda)')
-    parser.add_argument('--range', default='[140,150]', help='SWR plot range')
+    parser.add_argument('--range', default='[140,150]', help='SWR plot range (MHz)')
     parser.add_argument('--showplot', dest='showplot', action='store_true')
     parser.add_argument('--no-showplot', dest='showplot', action='store_false')
     parser.set_defaults(showplot=True)
 
     args = parser.parse_args()
     pprint(args.showplot)
-    fwd_gain = yagi3(freq=float(args.freq), 
+    perf_params = yagix(freq=float(args.freq), 
           element_spacing=loads(args.elespace),
           element_length=loads(args.elelength),
           show_plots=True)
-    print(f'Forward Gain = {fwd_gain}')
+    print(f'Forward Gain = {perf_params}')
     pprint(args.showplot)
