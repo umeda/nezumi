@@ -60,12 +60,13 @@ from engineering_notation import EngNumber
 from pprint import pprint
 from json import loads
 
-def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0.9560,0.9178], units='m', show_plots=False ):
+def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0.9560,0.9178], units='m', plot_range=[140,150],show_plots=False ):
 
     #TODO: return element lengths in wavelengths or something like that.
-    
+    print(units)
     # convert to meters
     if units == 'mm':
+        print('mm')
         element_spacing = [space / 1000 for space in element_spacing]
         element_length = [element / 1000 for element in element_length]
     elif units == 'feet':
@@ -250,8 +251,8 @@ def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0
         plt.show()
 
     system_impedance = 50  
-    start_freq = 140
-    stop_freq = 150
+    start_freq = plot_range[0]
+    stop_freq = plot_range[1]
     freq_points = 100
     context.fr_card(0, freq_points, start_freq, (stop_freq-start_freq)/freq_points)
     # ifrq_linear_step, count, start_frequency, step_size
@@ -305,6 +306,8 @@ def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0
 if __name__ == '__main__':
 
     '''
+    Design Parameters for a reference three element yagi
+
     driven element length = 0.9560385257985257
     reflector length = 0.9942800668304668
     reflector spacing = 0.47801926289926283
@@ -322,11 +325,14 @@ if __name__ == '__main__':
     parser.add_argument('--no-showplot', dest='showplot', action='store_false')
     parser.set_defaults(showplot=True)
 
+
+    # TODO: add some error checking on parameters
     args = parser.parse_args()
     pprint(args.showplot)
     perf_params = yagix(freq=float(args.freq), 
-          element_spacing=loads(args.elespace),
-          element_length=loads(args.elelength),
-          show_plots=True)
-    print(f'Forward Gain = {perf_params}')
-    pprint(args.showplot)
+            element_spacing=loads(args.elespace),
+            element_length=loads(args.elelength),
+            units=args.units,
+            plot_range=loads(args.range),
+            show_plots=args.showplot)
+    print(f'Performance Parameters = {perf_params}')
