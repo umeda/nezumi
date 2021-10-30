@@ -69,7 +69,7 @@ def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0
         print('mm')
         element_spacing = [space / 1000 for space in element_spacing]
         element_length = [element / 1000 for element in element_length]
-    elif units == 'feet':
+    elif units == 'ft':
         element_spacing = [space * 12 * 25.4 / 1000 for space in element_spacing]
         element_length = [element * 12 * 25.4 / 1000 for element in element_length]
     elif units == 'in':
@@ -246,7 +246,7 @@ def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0
         # pprint(f'Forward Gain = {fwd_gain}')
 
         # ax.set_title("3 element yagi - side view", va='bottom')
-        ax.set_title(f'3 Element Yagi Radiation Pattern: Side View\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Length = {element_length[0]}, Director Factor = {element_length[2]}')
+        ax.set_title(f'3 Element Yagi Radiation Pattern: Side View')
         plt.savefig("radiation_pattern_%i_MHz.png" % freq)
         plt.show()
 
@@ -274,7 +274,7 @@ def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_length=[0.9943,0
     if show_plots:
         plt.figure()
         plt.plot(freqs, vswrs)
-        plt.title(f'VSWR of a 3 element yagi for a {system_impedance} Ohm system\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Factor = {element_length[0]}, Director Factor = {element_length[2]}')
+        plt.title(f'VSWR of a 3 element yagi for a {system_impedance} Ohm system')
         plt.xlabel("Frequency (MHz)")
         plt.ylabel("VSWR")
         plt.grid(True)
