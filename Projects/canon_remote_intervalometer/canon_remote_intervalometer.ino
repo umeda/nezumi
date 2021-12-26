@@ -6,9 +6,9 @@
 
   Remote Intervalometer for Canon EOS cameras.
 
-  This sketch uses and Arduino Nano to send an IR signal to the camera, once per minute, to snap a photo.
+  This sketch uses an Arduino Nano to send an IR signal to the camera, once per minute, to snap a photo.
   The photos can then be sequenced into a time-lapse video. The count-down display is made from three HP 5082-7340 LED modules.
-  The below schematic diagram was made with ascciiflow.com.
+  The below schematic diagram was made with asciiflow.com.
 
   +5  ──────────────────────────────┬────────┬────────┐
                                     │        │        │
