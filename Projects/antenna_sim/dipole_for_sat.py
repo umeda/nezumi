@@ -35,7 +35,7 @@ import math
 from engineering_notation import EngNumber
 from pprint import pprint
 from json import loads
-from yagi_sim import yagix
+from dipole_sim import dipolex
 import matplotlib.collections as collections
 
 if __name__ == '__main__':
@@ -45,9 +45,11 @@ if __name__ == '__main__':
     parser.add_argument('--elefactor', default="[1.04,1.00,0.96]", help='Element length factor from back to front')    
     args = parser.parse_args()
 
-    # existing yagi
-    print(yagix(freq=146.52, element_lengths=[1053.0,899.0,892.0], element_spacing=[208.0,327.0], units='mm', plot_range=[130,170], show_plots=True))
-    # optimized yagi
-    print(yagix(freq=146.52, element_lengths=[994.0,956.0,917.0],  element_spacing=[478.0,478.0], units='mm', plot_range=[130,170], show_plots=True))
+    # existing dipole
+    print(dipolex(freq=146.52, element_length=899.0, units='mm', plot_range=[140,150], show_plots=True))
+    # optimized dipole
+    print(dipolex(freq=146.52, element_length=956.0, units='mm', plot_range=[140,150], show_plots=True))
+    # one more dipole (what's the sat freq?)
+    print(dipolex(freq=146.52, element_length=974.0, units='mm', plot_range=[140,150], show_plots=True))
 
     print('pau')

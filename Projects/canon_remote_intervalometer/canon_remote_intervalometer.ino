@@ -20,7 +20,7 @@
                                     │ │ │    │  │ │   │ │
   D6 - Latch Enable C ──────────────┼─┼─┼────┼──┼─┼───┼─┼┐
                                     │ │ │    │  │ │   │ ││
-  D2 - Input 1 ───────────────────┬─┼─┼─┼──┬─┼──┼─┼─┐ │ ││
+  D9 - Input 1 ───────────────────┬─┼─┼─┼──┬─┼──┼─┼─┐ │ ││
                                   │ │ │ │  │ │  │ │ │ │ ││
                                 ┌─┴─┴─┴─┴─┬┴─┴──┴─┴┬┴─┴─┴┴──┐
                                 │         │        │        │
@@ -36,7 +36,9 @@
                                       │ │      │ │       │ │
   D5 - Input 9 ───────────────────────┴─┼──────┴─┼───────┘ │
                                         │        │         │
-  D9 - Blanking Control ────────────────┴────────┴─────────┘
+  A0 - Mode Blanking Control ───────────┘        │         │
+                                                 │         │
+  A1 - Time Blanking Control ────────────────────┴─────────┘
 
   The energy-saving blanking control has not been added. What is planned is for the count-down timer to only flash for a couple hundred
   milliseconds.
@@ -63,6 +65,25 @@
   
 */
 
+#include <Arduino.h>
+#include <RotaryEncoder.h>
+
+#define SWITCH 2
+#define PIN_IN1 10
+#define PIN_IN2 11
+#define MODE_BLANK A0
+#define TIME_BLANK A1
+#define RUN_0S 10
+#define RUN_2S 11
+
+// A pointer to the dynamic created rotary encoder instance.
+// This will be done in setup()
+RotaryEncoder *encoder = nullptr;
+
+void checkPosition()
+{
+  encoder->tick(); // just call tick() to check the state.
+}
 
 int interval = 60;
 
@@ -70,20 +91,47 @@ byte ones = 9;
 byte tens = 9;
 byte huns = 0;
 
+byte dim = 0;
+byte mode = 10;
+
+int pos = 0;
+int dir = 0;
+
+volatile int state = 0;
+
 void setup() {
+
+  Serial.begin(115200);
+  while (!Serial)
+    ;
+    
+  // setup the rotary encoder functionality
+  // use FOUR3 mode when PIN_IN1, PIN_IN2 signals are always HIGH in latch position.
+  encoder = new RotaryEncoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::FOUR3);
+
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(12, OUTPUT);
   pinMode(A5, INPUT_PULLUP); //A6 and A7 cant be used this way on a Nano
   Serial.begin(9600);  pinMode(0, OUTPUT);
-  pinMode(2, OUTPUT);
+  pinMode(SWITCH, INPUT);
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
   pinMode(5, OUTPUT);
   pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
-  
+  pinMode(9, OUTPUT);
+  pinMode(MODE_BLANK, OUTPUT);
+  pinMode(TIME_BLANK, OUTPUT);
+  digitalWrite(MODE_BLANK,LOW);
+  digitalWrite(TIME_BLANK,LOW);
+
+  // register interrupt routine
+  attachInterrupt(digitalPinToInterrupt(PIN_IN1), checkPosition, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_IN2), checkPosition, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(SWITCH), incState, CHANGE);
+
 }
 
 
@@ -93,38 +141,140 @@ void loop() {
   // Serial.print("!");
   // }
   
-  Serial.println("hello!");
-  
-  for (int i = 0; i <= 15; i++) {  
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delayMicroseconds(13);                       // 13 uS results in about 33 kHz
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-    delayMicroseconds(13);                       // 13 uS results in about 33 kHz
+  while(state == 0) {
+    for (int i = 0; i <= 15; i++) {  
+      digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+      delayMicroseconds(13);                       // 13 uS results in about 33 kHz
+      digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+      delayMicroseconds(13);                       // 13 uS results in about 33 kHz
+    }
+    delayMicroseconds(5360);                       // trigger shutter with 2 second delay
+    if(mode == 10 or mode == 12){
+      delayMicroseconds(2000);                       // additional 2 ms to trigger shutter immediately
+    }
+    for (int i = 0; i <= 15; i++) {  
+      digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+      delayMicroseconds(13);                       // 13 uS results in about 33 kHz
+      digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+      delayMicroseconds(13);                       // 13 uS results in about 33 kHz
+    }
+    for (int i = interval; i >= 1; i--) {
+      Serial.println(i);
+      for (int j = 0; j < 9; j++){ 
+        digitalWrite(TIME_BLANK,LOW);
+        if(j > dim) {
+          digitalWrite(TIME_BLANK,HIGH);
+        }
+        delay(100); // interrupts ignored during delay
+          if(state != 0) {
+            j = 10;  // bail out early!
+            i = 0;
+          }
+      }
+      // huns = i / 100;
+      huns = mode;
+      tens = i / 10;
+      ones = i % 10;
+      dispChars();  // this takes 100 mS! timing is off by 10 percent if j doesn't stop at 9
+    }
   }
-  delayMicroseconds(5360);                       // trigger shutter with 2 second delay
-  delayMicroseconds(2000);                       // additional 2 ms to trigger shutter immediately
-  for (int i = 0; i <= 15; i++) {  
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delayMicroseconds(13);                       // 13 uS results in about 33 kHz
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-    delayMicroseconds(13);                       // 13 uS results in about 33 kHz
-  }
-  for (int i = interval; i >= 1; i--) {
-    delay(1000);
-    Serial.println(i);
-    huns = i / 100;
-    tens = i / 10;
-    ones = i % 10;
-    // huns = 10;
-    dispChars();
-  } 
   
+  digitalWrite(TIME_BLANK,HIGH);   
+  while(state == 1) {
+    static int pos = 0;
+    static int dir = 0;
+    encoder->tick(); // just call tick() to check the state.
+    int newPos = encoder->getPosition();
+    if (pos != newPos) {
+//      Serial.print("pos:");
+//      Serial.print(newPos);
+//      Serial.print(" dir:");
+//      Serial.println((int)(encoder->getDirection()));
+      dir = (int)(encoder->getDirection());
+      mode -= dir; // kinda wrong direction 
+      // Serial.println(mode);
+      pos = newPos;
+      if(mode == 9) mode = 13;
+      if(mode == 14) mode = 10;
+      // Serial.println(mode);
+      // Serial.println("");
+      huns = mode;
+      tens = 0;
+      ones = 0;
+      dispChars();    
+    }    
+  }
+
+
+  huns = interval / 100;
+  tens = interval / 10;
+  ones = interval % 10;
+  dispChars();
+  digitalWrite(TIME_BLANK,LOW);
+  digitalWrite(MODE_BLANK,LOW);
+  while(state == 2) {
+    static int pos = 0;
+    static int dir = 0;
+    encoder->tick(); // just call tick() to check the state.
+    int newPos = encoder->getPosition();
+    if (pos != newPos) {
+//      Serial.print("pos:");
+//      Serial.print(newPos);
+//      Serial.print(" dir:");
+//      Serial.println((int)(encoder->getDirection()));
+      dir = (int)(encoder->getDirection());
+      interval -= dir; // kinda wrong direction 
+      // Serial.println(mode);
+      pos = newPos;
+      if(interval == 0) interval = 1;
+      if(interval == 100) interval = 99;
+      // Serial.println(mode);
+      // Serial.println("");
+      huns = interval / 100;
+      tens = interval / 10;
+      ones = interval % 10;
+      dispChars();    
+    }    
+  }
+
+
+  huns = dim;
+  dispChars();
+  digitalWrite(TIME_BLANK,HIGH);
+  digitalWrite(MODE_BLANK,LOW);
+  while(state == 3) {
+    static int pos = 0;
+    static int dir = 0;
+    encoder->tick(); // just call tick() to check the state.
+    int newPos = encoder->getPosition();
+    if (pos != newPos) {
+//      Serial.print("pos:");
+//      Serial.print(newPos);
+//      Serial.print(" dir:");
+//      Serial.println((int)(encoder->getDirection()));
+      dir = (int)(encoder->getDirection());
+      dim -= dir; // kinda wrong direction 
+      // Serial.println(mode);
+      pos = newPos;
+      if(dim == -1) interval = 0;
+      if(dim == 10) dim = 9;
+      // Serial.println(mode);
+      // Serial.println("");
+      huns = dim;
+      dispChars();    
+    }    
+  }
+
+
+
+
+
 }
 
 
 void dispChars(){
-  Serial.println(ones);
-  digitalWrite(2, ones & 1);   // set 2 ^ 0
+  // Serial.println(ones);
+  digitalWrite(9, ones & 1);   // set 2 ^ 0
   digitalWrite(3, ones & 2);   // 
   digitalWrite(4, ones & 4);   // 
   digitalWrite(5, ones & 8);   // 
@@ -132,7 +282,7 @@ void dispChars(){
   delay(10);
   digitalWrite(6, HIGH);   // Latch
   delay(10);
-  digitalWrite(2, tens & 1);   // set 2 ^ 0
+  digitalWrite(9, tens & 1);   // set 2 ^ 0
   digitalWrite(3, tens & 2);   // 
   digitalWrite(4, tens & 4);   // 
   digitalWrite(5, tens & 8);   // 
@@ -140,7 +290,7 @@ void dispChars(){
   delay(10);
   digitalWrite(7, HIGH);   // Latch
   delay(10);
-  digitalWrite(2, huns & 1);   // set 2 ^ 0
+  digitalWrite(9, huns & 1);   // set 2 ^ 0
   digitalWrite(3, huns & 2);   // 
   digitalWrite(4, huns & 4);   // 
   digitalWrite(5, huns & 8);   // 
@@ -148,4 +298,14 @@ void dispChars(){
   delay(10);
   digitalWrite(8, HIGH);   // Latch
   delay(50);
+}
+
+void incState(){
+
+  if(digitalRead(SWITCH) == HIGH) {
+    state++;
+    if(state == 4) {
+      state = 0;
+    }
+  }
 }
