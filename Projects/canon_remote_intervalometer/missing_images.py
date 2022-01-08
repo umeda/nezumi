@@ -33,7 +33,7 @@ if __name__ == '__main__':
     import os
     from pathlib import Path
 
-    dir = '/home/tester/Desktop/stellar_time_lapse_220103/images'
+    dir = '~/Desktop/stellar_time_lapse_220103/images'
     
     files = Path(args.dir).iterdir()
 
