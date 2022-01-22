@@ -70,7 +70,7 @@ if __name__ == '__main__':
         #             reflector_len * (1.0 - len_factor / 1000), 
         #             reflector_len * (1.0 - len_factor / 1000) ** 2]
         # Driven element is half a wavelength.
-        len_list = [ref_len * (1.0 + len_factor / 1000),  
+        len_list = [ref_len * (1.0 + 40 / 1000),  
                     ref_len, 
                     ref_len * (1.0 - len_factor / 1000)]
         pprint(len_list)

@@ -5,10 +5,15 @@ This library function returns performance paramters for a 3 element yagi,
 given certain design parameters.
 
     Design Parameters:
-        
+
+        Number of Elements      
         Frequency
         Element Spacing
         Element Length
+        Element Diameter
+        Units
+        Include Radiation and SWR Plots
+        Frequency Range for SWR Plot 
 
     Performance Parameters:
     
@@ -16,7 +21,9 @@ given certain design parameters.
         Best SWR
         Min and Max Frequencies for SWR < 2
         Radiation Pattern
-        SWR Over Frequncy
+        SWR Over Frequency
+        Beam Width
+        FB Ratio
 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,14 +59,34 @@ import math
 from engineering_notation import EngNumber
 from pprint import pprint
 from json import loads
+import sys
 
-def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 0.96], show_plots=False ):
+def yagix(freq=146.52, element_spacing=[0.4780,0.4780], element_lengths=[0.9943,0.9560,0.9178], units='m', plot_range=[140,150],show_plots=False ):
 
-    #TODO: return element lengths in wavelengths.
-    
+    # TODO: return element lengths in wavelengths or something like that.
+    # TODO: error check - one less space than element, 
+    # TODO: error check - values are resonable.
+    if len(element_lengths) - len(element_spacing) != 1:
+        sys.exit(f'Error! There must be one more element than spaces.\nElements: {len(element_lengths)}, Spaces: {len(element_spacing)}')
+    # print(units)
+    # convert to meters
+    if units == 'mm':
+        # print('mm')
+        element_spacing = [space / 1000 for space in element_spacing]
+        element_lengths = [element / 1000 for element in element_lengths]
+    elif units == 'ft':
+        element_spacing = [space * 12 * 25.4 / 1000 for space in element_spacing]
+        element_lengths = [element * 12 * 25.4 / 1000 for element in element_lengths]
+    elif units == 'in':
+        element_spacing = [space * 25.4 / 1000  for space in element_spacing]
+        element_lengths = [element * 25.4 / 1000 for element in element_lengths]
+    elif units == 'lambda':
+        element_spacing = [space * 300 / freq for space in element_spacing]
+        element_lengths = [element * 300 / freq for element in element_lengths]
+
     # print(type(element_spacing))
-    # pprint(element_spaci ng)
-
+    # pprint(element_spacing)
+    # pprint(element_lengths)
     # creation of a nec context
     context=nec_context()
     # get the associated geometry
@@ -74,10 +101,9 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     # Derived Values
     wire_rad = wire_diameter_mm / 2000 
     length_ft = 468.0 / freq # dipole formula from ARRL
-    halfwave = length_ft * 12 * 25.4 / 1000  #  driven element length in meters.
-    halfwave = halfwave * 0.982
-    drv_len = halfwave * element_factor[1]
-    print('driven element length = ' + str(drv_len))
+    halfwave = length_ft * 12 * 25.4 / 1000  #  driven element length in millimeters.
+    drv_len = element_lengths[1]
+    # print(drv_len)
     num_segs = 35 # Number of segments per Element. More segments = increased accuracy and longer processing time.
     excitation_element_num = 1 #  Element to which excitation is applied.
 
@@ -91,12 +117,9 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
     # geo.wire(tag, num_segs, x1, y1, z1, x2, y2, z2, radius, rtap, rrad)
 
-
     #reflector
-    ref_len = halfwave * element_factor[0]
-    print('reflector length = ' + str(ref_len))
-    pos = -1 * halfwave * 2 * element_spacing[0]  # negative because it's behind the driven element
-    print('reflector spacing = ' + str(-pos))    
+    ref_len = element_lengths[0]
+    pos = -1 * element_spacing[0]  # negative because it's behind the driven element
     element_tag = 2
     center      = np.array([pos, 0, 0]) # back
     half_height = np.array([0  , 0, ref_len/2.0])
@@ -105,18 +128,19 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     nr_segments = 35
     geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
-    #director
-    dir_len = halfwave * element_factor[2]
-    print('director length = ' + str(dir_len))
-    pos = halfwave * 2 * element_spacing[1]
-    print('director spacing = ' + str(pos))    
-    element_tag = 3
-    center      = np.array([pos, 0, 0])
-    half_height = np.array([0  , 0, dir_len/2.0])
-    top         = center + half_height
-    bottom      = center - half_height
-    nr_segments = 35
-    geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
+    space_index = 1
+    pos = 0
+    #director - iterate through these
+    for dir_len in element_lengths[2:]:
+        pos += element_spacing[space_index]
+        space_index += 1
+        element_tag = 3
+        center      = np.array([pos, 0, 0])
+        half_height = np.array([0  , 0, dir_len/2.0])
+        top         = center + half_height
+        bottom      = center - half_height
+        nr_segments = 35
+        geo.wire(element_tag, nr_segments, bottom[0],bottom[1],bottom[2], top[0], top[1], top[2], wire_rad, 1.0, 1.0)
 
     brass_conductivity = 15600000 # mhos - Need to figure out how to use this.
     # nec.set_wire_conductivity(brass_conductivity)
@@ -225,13 +249,15 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
         # pprint(f'Forward Gain = {fwd_gain}')
 
         # ax.set_title("3 element yagi - side view", va='bottom')
-        ax.set_title(f'3 Element Yagi Radiation Pattern: Side View\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Factor = {element_factor[0]}, Director Factor = {element_factor[2]}')
-        plt.savefig("radiation_pattern_%i_MHz.png" % freq)
+        ax.set_title(f'{len(element_lengths)} Element Yagi Radiation Pattern: Side View')
+        filename = "radiation_pattern_%i_MHz.png" % freq
+        print("Saving plot to file: %s" % filename)
+        plt.savefig(filename)
         plt.show()
 
     system_impedance = 50  
-    start_freq = 140
-    stop_freq = 150
+    start_freq = plot_range[0]
+    stop_freq = plot_range[1]
     freq_points = 100
     context.fr_card(0, freq_points, start_freq, (stop_freq-start_freq)/freq_points)
     # ifrq_linear_step, count, start_frequency, step_size
@@ -253,7 +279,7 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     if show_plots:
         plt.figure()
         plt.plot(freqs, vswrs)
-        plt.title(f'VSWR of a 3 element yagi for a {system_impedance} Ohm system\nBack Space = {element_spacing[0]}, Front Space = {element_spacing[1]}, Reflector Factor = {element_factor[0]}, Director Factor = {element_factor[2]}')
+        plt.title(f'VSWR of a {len(element_lengths)} element yagi for a {system_impedance} Ohm system')
         plt.xlabel("Frequency (MHz)")
         plt.ylabel("VSWR")
         plt.grid(True)
@@ -283,14 +309,35 @@ def yagi3(freq=146.52, element_spacing=[0.25, 0.25], element_factor=[1.04, 1.0, 
     #return fwd_gain
      
 if __name__ == '__main__':
+
+    '''
+    Design Parameters for a reference three element yagi
+
+    driven element length = 0.9560385257985257
+    reflector length = 0.9942800668304668
+    reflector spacing = 0.47801926289926283
+    director length = 0.9177969847665846 
+    director spacing = 0.47801926289926283 
+    '''
+
     parser = argparse.ArgumentParser(description = 'Simulate a 3-element Yagi antenna')
     parser.add_argument('--freq', default=146.52, help='Driven element resonant frequency in MHz')
-    parser.add_argument('--elespacing', default="[0.250,0.250]", help='Element Spacing from back to front in wavelengths')
-    parser.add_argument('--elefactor', default="[1.04,1.00,0.96]", help='Element length factor from back to front')    
-    args = parser.parse_args()
-    fwd_gain = yagi3(freq=float(args.freq), 
-          element_spacing=loads(args.elespacing),
-          element_factor=loads(args.elefactor),
-          show_plots=True)
-    print(f'Forward Gain = {fwd_gain}')
+    parser.add_argument('--elelength', default="[0.9943,0.9560,0.9178]", help='Array of element lengths from back to front')
+    parser.add_argument('--elespace', default="[0.4780,0.4780]", help='Array of element spacing between elements from back to front')
+    parser.add_argument('--units', default='m', choices=['m', 'mm', 'ft', 'in', 'lambda'], help='Units in meters(m), millimeters(mm), feet(ft), inches(in), or wavelengths(lambda)')
+    parser.add_argument('--range', default='[140,150]', help='SWR plot range (MHz)')
+    parser.add_argument('--showplot', dest='showplot', action='store_true')
+    parser.add_argument('--no-showplot', dest='showplot', action='store_false')
+    parser.set_defaults(showplot=True)
 
+
+    # TODO: add some error checking on parameters
+    args = parser.parse_args()
+    # pprint(args.showplot)
+    perf_params = yagix(freq=float(args.freq), 
+            element_spacing=loads(args.elespace),
+            element_lengths=loads(args.elelength),
+            units=args.units,
+            plot_range=loads(args.range),
+            show_plots=args.showplot)
+    print(f'Performance Parameters = {perf_params}')

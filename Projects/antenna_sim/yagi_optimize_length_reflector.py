@@ -72,7 +72,7 @@ if __name__ == '__main__':
         # Driven element is half a wavelength.
         len_list = [ref_len * (1.0 + len_factor / 1000),  
                     ref_len, 
-                    ref_len * (1.0 - len_factor / 1000)]
+                    ref_len * (1.0 - 40 / 1000)]
         pprint(len_list)
         perf_params = yagi3(freq=float(args.freq), 
                          element_spacing=loads(args.elespacing),
