@@ -5,9 +5,11 @@ engineering_notation
 isort==4.3.21
 kiwisolver==1.2.0
 lazy-object-proxy==1.4.3
-matplotlib==3.2.1
+# matplotlib==3.2.1
+matplotlib
 mccabe==0.6.1
-numpy==1.18.3
+# numpy==1.18.3
+numpy
 pkg-resources==0.0.0
 pylint==2.4.4
 PyNEC==1.7.3.4

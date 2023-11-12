@@ -24,7 +24,7 @@ SOFTWARE.
 
 import numpy as np
 from numpy.lib.function_base import blackman
-import scipy.optimize
+# import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import argparse
