@@ -21,7 +21,7 @@ SOFTWARE.
 '''
 
 import numpy as np
-import scipy.optimize
+# import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
