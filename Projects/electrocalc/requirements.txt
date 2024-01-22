@@ -25,7 +25,7 @@ notify2==0.3
 onboard==1.4.1
 PAM==0.4.2
 pexpect==4.2.1
-Pillow==10.0.1
+Pillow==10.2.0
 protobuf==3.18.3
 psutil==5.6.6
 pycairo==1.16.2
