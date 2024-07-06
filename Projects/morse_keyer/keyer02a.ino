@@ -1,8 +1,8 @@
 /*
-Morse Keyer
+Morse Paddle Keyer
 This implements the paddle functionality.
 If at half the inter-element gap (called UNIT here) after a dit or dah has been played, the same key is still down, 
-the element (dit or dah will be repeated
+the element (dit or dah) will be repeated
 
 Copyright 2024 Nezumi Workbench
 
@@ -26,13 +26,22 @@ SOFTWARE.
 
 
 Key "I"
-  ┌────────┐┐┐┐┐┐┐┐┐┐    
- ─┘        └└└└└└└└└└────
-Output     
-   ┌────┐ 	 ┌────┐    
- ──┘    └────┘    └────
-	
+dit  ┌────────┐┐┐┐┐┐┐┐┐    
+    ─┘        └└└└└└└└└─────
+dah
+    ────────────────────────
+out  ┌────┐    ┌────┐    
+    ─┘    └────┘    └───────
 
+Key "A"
+dit  ┌┐┐┐┐┐┐    
+    ─┘└└└└└└───────────────────────────
+dah           ┌┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐┐    
+    ──────────┘└└└└└└└└└└└└└└└└└└└└────
+out  ┌────┐  ┌┌┌────────────────┐┐┐    
+    ─┘    └──┘┘┘                └└└────
+
+Would a "let go when you hear the start of the next tone" strategy be better for precise inter-element gaps?
 
 
 
@@ -50,12 +59,12 @@ void setup() {
 }
 
 void loop() {
-  if(!digitalRead(DIT)){
-    tone(SPEAKER, TONE);
+  if(!digitalRead(DIT)){ // what if this was a "if (dit or dah)", then implement the proper delay, depending on the key. recursion would have to be 5 deep for max number of elements.
+    tone(SPEAKER, TONE); //can two bits be read at the same time?
     delay(UNIT);
     noTone(SPEAKER);
     delay(UNIT / 2);
-    while(!digitalRead(DIT)){
+    while(!digitalRead(DIT)){  
       delay(UNIT / 2);
       tone(SPEAKER, TONE);
       delay(UNIT);
