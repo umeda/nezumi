@@ -24,6 +24,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+Key "I"
+  ┌────────┐┐┐┐┐┐┐┐┐┐    
+ ─┘        └└└└└└└└└└────
+Output     
+   ┌────┐ 	 ┌────┐    
+ ──┘    └────┘    └────
+	
+
+
+
+
 */
 const int DIT = 2; // connect dit to pin 2
 const int DAH = 3; // connect dah to pin 3
