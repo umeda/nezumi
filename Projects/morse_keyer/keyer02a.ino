@@ -46,8 +46,8 @@ Would a "let go when you hear the start of the next tone" strategy be better for
 
 
 */
-const int DIT = 2; // connect dit to pin 2
-const int DAH = 3; // connect dah to pin 3
+const int DIT = 2; // connect dit to pin 2 (thumb)
+const int DAH = 3; // connect dah to pin 3 (index finger)
 const int SPEAKER = 10; // connect the speaker to pin 10
 const int TONE = 800;
 const int UNIT = 120; // 120 = 10 wpm
