@@ -20,7 +20,7 @@
     dc-vfo-03 Add spaces for powers of 10^3
     dc-vfo-04 Add bands, band edges, and band memory.
     dc-vfo-05 abandoned
-    dc-vfo-04 replace use of set_freq with set_freq_manual from si5351_phase_test.
+    dc-vfo-06 replace use of set_freq with set_freq_manual from si5351_phase_test - phase shift implemented.
     
 
 */
