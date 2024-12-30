@@ -110,8 +110,8 @@ def print_frame2(f):
         print('Decoded Message  = ' + decoded_msg)
         parsed_msg = aprslib.parse(decoded_msg)
         pp(parsed_msg)
-    except:
-        print('failed to decode or parse')
+    except Exception as e:
+        print(f'failed to decode or parse: {type(e).__name__}, {e}')
     else:
         # if color == 1: color = 2
         # else: color = 1
