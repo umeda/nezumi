@@ -259,12 +259,16 @@ void setVfoFrequency(unsigned long int frequency) {
   print_ull(frequency);
   Serial.println("");
   
+  Serial.print("PLL multiplier: ");
+  print_ull(bandMult[belIndex]);
+  Serial.println("");
+  
   // si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0); // is this really required to make the next freq change?
 //  si5351.reset();
 //  si5351.set_freq_manual(700000000ULL, 35000000000ULL, SI5351_CLK0);
 //  si5351.set_freq_manual(700000000ULL, 35000000000ULL, SI5351_CLK1);
-  si5351.set_freq_manual(frequency, frequency * bandMult[belIndex], SI5351_CLK0);
-  si5351.set_freq_manual(frequency, frequency * bandMult[belIndex], SI5351_CLK1);
+  si5351.set_freq_manual(frequency * 100ULL, frequency * bandMult[belIndex] * 100ULL, SI5351_CLK0);
+  si5351.set_freq_manual(frequency * 100ULL, frequency * bandMult[belIndex] * 100ULL, SI5351_CLK1);
 //  si5351.set_freq_manual(frequency, frequency * gMult, SI5351_CLK0); // two in a row is fine...
 //  si5351.set_freq_manual(frequency, frequency * gMult, SI5351_CLK1);
   
@@ -301,19 +305,24 @@ void setupOscillator() {
   Serial.print("gFrequency: ");
   print_ull(gFrequency);
   Serial.println("");
-  Serial.print("gMult: ");
-  print_ull(gMult);
-  Serial.println("");
+//  Serial.print("gMult: ");
+//  print_ull(gMult);
+//  Serial.println("");
+//  Serial.print("PLL: ");
+//  print_ull(gFrequency * gMult);
+//  Serial.println("");
   //delay(500);
+  //                     710000000     71000000000
+  si5351.set_freq_manual(gFrequency * 100ULL, gFrequency * 100ULL * 100ULL, SI5351_CLK0);
+  si5351.set_freq_manual(gFrequency * 100ULL, gFrequency * 100ULL * 100ULL, SI5351_CLK1);
+//  si5351.set_freq_manual(710000000ULL, 71000000000ULL, SI5351_CLK0);
+//  si5351.set_freq_manual(gFrequency*100, 71000000000ULL, SI5351_CLK1);
 
-//  si5351.set_freq_manual(700000000ULL, 35000000000ULL, SI5351_CLK0);
-//  si5351.set_freq_manual(700000000ULL, 35000000000ULL, SI5351_CLK1);
+//  unsigned long long freq =       705000000ULL;
+//  unsigned long long pll_freq = 70500000000ULL;
 
-  unsigned long long freq =       705000000ULL;
-  unsigned long long pll_freq = 70500000000ULL;
-
-  si5351.set_freq_manual(gFrequency, gFrequency * gMult, SI5351_CLK0);
-  si5351.set_freq_manual(gFrequency, gFrequency * gMult, SI5351_CLK1);
+//  si5351.set_freq_manual(gFrequency* 100, gFrequency * gMult * 100, SI5351_CLK0);
+//  si5351.set_freq_manual(gFrequency* 100, gFrequency * gMult * 100, SI5351_CLK1);
   Serial.println("freq set");
   //delay(500);
 
@@ -324,6 +333,8 @@ void setupOscillator() {
   si5351.output_enable(SI5351_CLK0, 1);  // turn VFO on 
   si5351.output_enable(SI5351_CLK1, 1);  // turn VFO on 
   //delay(500);
+
+  // while(1){};
 
   // hmmm. wait for status before trying this?
   si5351.set_phase(SI5351_CLK0, 0);
@@ -343,6 +354,9 @@ void setupOscillator() {
   //delay(5000);
   // printSi5351Status();
   //delay(5000);
+  // while(1){};
+  Serial.println("osc setup complete");
+
 }
 
 /*
