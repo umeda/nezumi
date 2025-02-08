@@ -1,7 +1,7 @@
 /*
 Morse Paddle Keyer
 This implements the paddle functionality.
-If at half the inter-element gap (called UNIT here) after a dit or dah has been played, the same key is still down, 
+If at half the inter-element gap (called UNIT here) after a dit or dah has been played, and the same key is still down, 
 the element (dit or dah) will be repeated
 
 Copyright 2024 Nezumi Workbench
