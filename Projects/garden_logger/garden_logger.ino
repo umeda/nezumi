@@ -1,5 +1,5 @@
 /*
-  garden datalogger v0.4
+  garden datalogger v0.3
 
   This sketch logs one measurement per minute to an SD Card.
 
@@ -29,15 +29,10 @@
      MISO - pin 12
      CLK - pin 13
      CS - pin 10 (for HiLetGo data logger)
-
-  Soil moisture sensors are connected to analog read pins A1, A2, and A3
-  Soil moisture% = -0.42 * Ax + 442
-  
+     
    Some code snippets from Adafruit Industries.
    Other code snipppets from http://www.pjrc.com/teensy/td_libs_OneWire.html
    Copyright 2020 Nezumi Workbench
-
-   This is free software. Attribution is appreciated.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -65,9 +60,6 @@
 const int chipSelect = 10;
 int sensorPin = A0;    // input pin for voltage divider
 int sensorValue = 0;  // variable to store the value coming from the sensor
-int sm1 = A1;
-int sm2 = A2;
-int sm3 = A3;
 float rm = 0.0;
 int sampleMillis = 30000;
 char buffer[20]; // datetime string
@@ -76,8 +68,8 @@ DHT dht(DHTPIN, DHTTYPE);
 OneWire  ds1(3);  // on pin 3 (a 4.7K resistor is necessary)
 OneWire  ds2(4);  // on pin 4 (a 4.7K resistor is necessary)
 OneWire  ds3(5);  // on pin 5 (a 4.7K resistor is necessary)
-int long pulse_count = 0;
-String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3, sm_1, sm_2, sm_3, flow";
+
+String measurands = "time, light, air_temp, air_rh, temp_1, temp_2, temp_3";
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -85,6 +77,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+
 
   if (! rtc.begin()) {
     // Serial.println("Couldn't find RTC");
@@ -102,10 +95,6 @@ void setup() {
     sendData("msg", "Card failed or not present.");
     // don't do anything more:
     while (1);
-
-  // set up interrupt to increment counter when tick on water wheel occurs
-  attachInterrupt(3,water_wheel,FALLING);
-  
   }
   // Serial.println("card initialized.");
   sendData("msg", "Card initialized.");
@@ -123,8 +112,6 @@ void setup() {
 
 void loop() {
   // make a string for assembling the data to log:
-//  Serial.println("top of the loop");
-//  Serial.flush();
   String dataString = "";
 
   DateTime now = rtc.now();
@@ -140,9 +127,8 @@ void loop() {
   float t1 = getTemp(ds1);
   float t2 = getTemp(ds2);
   float t3 = getTemp(ds3);
-  float m1 = analogRead(sm1);
-  float m2 = analogRead(sm2);
-  float m3 = analogRead(sm3);
+
+  
   
   dataString += String(rm);
   dataString += ", ";
@@ -155,19 +141,10 @@ void loop() {
   dataString += String(t2);
   dataString += ", ";
   dataString += String(t3);
-  dataString += ", ";
-  dataString += String(m1);
-  dataString += ", ";
-  dataString += String(m2);
-  dataString += ", ";
-  dataString += String(m3);
-  dataString += ", ";
-  dataString += String(pulse_count);
 
-  saveData(dataString); 
+  saveData(dataString);
   sendData("data, " + measurands, dataString);
-
-//  delay(5000);
+  
   delay(sampleMillis);
   delay(sampleMillis);
 }
@@ -178,14 +155,14 @@ void loop() {
 #################################################################
 */
 
-void saveData(String monitordata){
+void saveData(String data){
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   File dataFile = SD.open("garden.csv", FILE_WRITE);
 
   // if the file is available, write to it:
   if (dataFile) {
-    dataFile.println(monitordata);
+    dataFile.println(data);
     dataFile.close();
   }
   // if the file isn't open, pop up an error:
@@ -195,12 +172,9 @@ void saveData(String monitordata){
     }
    }
 
-void sendData(String message, String monitordata){
-    // print to the serial port
-    Serial.print(message);
-    Serial.print(", ");
-    Serial.print(monitordata);
-    Serial.println("");
+void sendData(String message, String data){
+    // print to the serial port:
+    Serial.println(message + ", " + data);
     Serial.flush();
     }
 
@@ -301,9 +275,4 @@ float getTemp(OneWire ds) {
   //Serial.print(fahrenheit);
   //Serial.println(" Fahrenheit");
   return(celsius);
-}
-
-void water_wheel() {
-  // increment counter when water wheel clicks.
-  pulse_count++;  
 }

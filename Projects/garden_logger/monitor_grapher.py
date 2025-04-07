@@ -39,7 +39,7 @@ with open('GARDEN.CSV') as csvfile:
     foundStartTime = False
 
     for row in readCSV:
-        print(row)
+        # print(row)
         if 'Title: ' in row[0]:
             # Add the following Dict
             # {"title": string, dateTimes: list: "resistances": list  }

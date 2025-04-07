@@ -8,11 +8,6 @@ from time import sleep
 import threading
 from pprint import pprint
 
-import RPi.GPIO as GPIO
-import time
-import os
-
-
 # would it be better to use gevent? Maybe not.
 app = Flask(__name__)
 
@@ -27,19 +22,6 @@ serialString = ""  # Used to hold data coming over UART
 loggerData = ""
 params = []
 values = []
-
- 
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
- 
-
-def Shutdown(channel):
-    # blink shutdown led
-    os.system("sudo shutdown -h now")
-
-GPIO.add_event_detect(21, GPIO.FALLING, callback=Shutdown, bouncetime=2000)
 
 
 def monLogger():
@@ -63,22 +45,31 @@ def monLogger():
             serialString = ''
             loggerData = ''
             serialString = serialPort.readline()
-            # Print the contents of the serial data
+            #Print the contents of the serial data
             print(serialString.decode('Ascii'))
             loggerData = serialString.decode('Ascii')
             data = serialString.decode('Ascii').split(',')
             # better do some error checking here.
             if data[0] == 'msg':
                 loggerData = data[1]
+                print('msg')
+                print(data[1])
             else:
+                print(data)
                 numMeasurements = int((len(data) - 1)/2)
-                print(numMeasurements)
-                params = data[1:numMeasurements + 1]
-                values = data[numMeasurements + 1:(numMeasurements * 2) + 1]
-                pprint(params)
-                pprint(values)
-                # check for low voltage - if low for more than an hour,
-                # call the shutdown routine.
+                print(f"Number of Measurements = {numMeasurements}")
+                if numMeasurements == 0:
+                    print('no measurements')
+                else:
+                    params = data[1:numMeasurements + 1]
+                    values = data[numMeasurements + 1:(numMeasurements * 2) + 1]
+                    print(f"values = {values}")
+                    values[2] = str(float(values[2]) * 9.0 / 5.0 + 32.0)[:4]
+                    values[4] = str(float(values[4]) * 9.0 / 5.0 + 32.0)[:4]
+                    values[5] = str(float(values[5]) * 9.0 / 5.0 + 32.0)[:4]
+                    values[6] = str(float(values[6]) * 9.0 / 5.0 + 32.0)[:4]
+                    pprint(params)
+                    pprint(values)
             # loggerData = serialString.decode('Ascii')
             print('blah')
             # Tell the device connected over the serial port that we recevied the data!
